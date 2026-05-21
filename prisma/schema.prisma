@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  DOSEN
+  GKM
+  DEKANAT
+}
+
+enum SessionStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum TeachingMethod {
+  TATAP_MUKA
+  PRAKTIKUM
+  SEMINAR
+  FIELD_STUDY
+  ZOOM
+  GOOGLE_MEET
+  MS_TEAMS
+  LMS
+  PLATFORM_LAIN
+}
+
+enum SessionType {
+  NORMAL
+  PENGGANTI
+  TAMBAHAN
+}
+
+enum NotificationType {
+  DARING_WARNING
+  DARING_FULL
+  REMINDER_PUBLISH
+  SYSTEM
+}
+
+model Faculty {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  prodi          Prodi[]
+  campusLocation CampusLocation?
+
+  @@map("faculties")
+}
+
+model CampusLocation {
+  id           String   @id @default(cuid())
+  facultyId    String   @unique
+  latitude     Float
+  longitude    Float
+  radiusMeters Int      @default(300)
+  label        String?
+  updatedById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  faculty   Faculty @relation(fields: [facultyId], references: [id])
+  updatedBy User?   @relation("LocationUpdatedBy", fields: [updatedById], references: [id])
+
+  @@map("campus_locations")
+}
+
+model Prodi {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  facultyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  faculty  Faculty  @relation(fields: [facultyId], references: [id])
+  users    User[]   @relation("ProdiMembers")
+  gkmUsers User[]   @relation("GKMProdi")
+  courses  Course[]
+
+  @@map("prodi")
+}
+
+model Semester {
+  id        String   @id @default(cuid())
+  name      String
+  year      String
+  term      String
+  isActive  Boolean  @default(false)
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses       Course[]
+  teachingLoads TeachingLoad[]
+
+  @@map("semesters")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(DOSEN)
+  nidn      String?  @unique
+  nip       String?
+  phone     String?
+  avatar    String?
+  prodiId           String?
+  gkmProdiId        String?
+  resetToken        String?
+  resetTokenExpires DateTime?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  prodi           Prodi?   @relation("ProdiMembers", fields: [prodiId], references: [id])
+  gkmProdi        Prodi?   @relation("GKMProdi", fields: [gkmProdiId], references: [id])
+  teachingLoads   TeachingLoad[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  locationUpdates CampusLocation[] @relation("LocationUpdatedBy")
+
+  @@map("users")
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  name         String
+  code         String
+  sks          Int
+  totalMeeting Int      @default(16)
+  prodiId      String
+  semesterId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  prodi         Prodi          @relation(fields: [prodiId], references: [id])
+  semester      Semester       @relation(fields: [semesterId], references: [id])
+  teachingLoads TeachingLoad[]
+
+  @@unique([code, semesterId])
+  @@map("courses")
+}
+
+model TeachingLoad {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  semesterId String
+  isTeam     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id])
+  course   Course           @relation(fields: [courseId], references: [id])
+  semester Semester         @relation(fields: [semesterId], references: [id])
+  sessions LectureSession[]
+
+  @@unique([userId, courseId, semesterId])
+  @@map("teaching_loads")
+}
+
+model LectureSession {
+  id             String         @id @default(cuid())
+  teachingLoadId String
+  meetingNumber  Int
+  date           DateTime
+  startTime      String
+  endTime        String
+  topic          String
+  method         TeachingMethod
+  sessionType    SessionType    @default(NORMAL)
+
+  studentPresent Int            @default(0)
+  studentAbsent  Int            @default(0)
+  studentTotal   Int            @default(0)
+
+  latitude       Float?
+  longitude      Float?
+  gpsAccuracy    Float?
+  distanceMeters Float?
+  isGpsValid     Boolean?
+
+  platformUrl    String?
+  isDaring       Boolean        @default(false)
+
+  status         SessionStatus  @default(DRAFT)
+  publishedAt    DateTime?
+
+  bapGeneratedAt DateTime?
+
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  teachingLoad TeachingLoad @relation(fields: [teachingLoadId], references: [id])
+  documents    Document[]
+
+  @@map("lecture_sessions")
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  sessionId String
+  name      String
+  fileUrl   String
+  fileType  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+
+  session LectureSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  relatedId String?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  tableName String
+  recordId  String?
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

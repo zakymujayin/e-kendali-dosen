@@ -1,0 +1,21 @@
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+.env.local
+.env*.local
+*.log
+.DS_Store
+
+# AI Agent files
+00_MASTER_PROMPT_v*.md
+01_SRS_v*.md
+02_ERD_v*.md
+03_API_v*.md
+04_Checklist_v*.md
+CLAUDE.md
+GEMINI.md
+AGENTS.md
+.opencode/
+.cursor/
+.windsurfrules
