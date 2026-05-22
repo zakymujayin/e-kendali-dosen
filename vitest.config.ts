@@ -7,6 +7,11 @@ export default defineConfig({
     setupFiles: ["./tests/setup.ts"],
     globals: true,
     include: ["tests/**/*.test.{ts,tsx}"],
+    server: {
+      deps: {
+        inline: ["next-auth"],
+      },
+    },
   },
   resolve: {
     alias: {
