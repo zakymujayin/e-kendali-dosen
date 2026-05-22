@@ -111,7 +111,11 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                       </>
                     )}
                     {s.status === "PUBLISHED" && (
-                      <Button variant="ghost" size="icon" disabled>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/${s.id}`)}
+                      >
                         <FileDown className="h-4 w-4" />
                       </Button>
                     )}
