@@ -1,0 +1,135 @@
+"use client"
+
+import { useState, useCallback } from "react"
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table, TableHeader, TableBody, TableHead, TableRow, TableCell
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Download, FileText, Loader2 } from "lucide-react"
+
+interface Semester { id: string; name: string; year: string; term: string; isActive: boolean }
+interface Course { code: string; name: string; sks: number; published: number; target: number; progressPercent: number; daring: number; luring: number; avgAttendance: number }
+interface BkdDosen { id: string; name: string; nidn: string | null; prodi: string; totalSks: number; totalMk: number; totalPublished: number; totalTarget: number; progressPercent: number; daringCount: number; luringCount: number; avgAttendance: number; courses: Course[] }
+interface BkdData { semester: { id: string; name: string; year: string } | null; reportDate: string; dosen: BkdDosen[] }
+
+interface Props { semesters: Semester[]; activeSemesterId?: string; userId: string }
+
+export function DosenReportsClient({ semesters, activeSemesterId, userId }: Props) {
+  const [semesterId, setSemesterId] = useState(activeSemesterId || "")
+  const [data, setData] = useState<BkdData | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (semesterId) params.set("semesterId", semesterId)
+      params.set("userId", userId)
+      const res = await fetch(`/api/reports/bkd?${params.toString()}`)
+      const json = await res.json()
+      if (json.success) setData(json.data)
+    } catch {}
+    setLoading(false)
+  }, [semesterId, userId])
+
+  const exportUrl = (type: "excel" | "pdf") => {
+    const params = new URLSearchParams()
+    if (semesterId) params.set("semesterId", semesterId)
+    params.set("userId", userId)
+    return `/api/reports/bkd/export-${type}?${params.toString()}`
+  }
+
+  const dosen = data?.dosen?.[0]
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Laporan BKD</h1>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="space-y-1">
+          <Label className="text-xs">Semester</Label>
+          <Select value={semesterId} onValueChange={setSemesterId}>
+            <SelectTrigger className="w-[220px]"><SelectValue placeholder="Pilih Semester" /></SelectTrigger>
+            <SelectContent>
+              {semesters.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name} {s.year} {s.isActive ? "(Aktif)" : ""}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button onClick={fetchData} disabled={loading || !semesterId}>
+          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+          Tampilkan
+        </Button>
+        {data && (
+          <>
+            <Button variant="outline" asChild>
+              <a href={exportUrl("excel")}><Download className="h-4 w-4 mr-2" />Excel</a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href={exportUrl("pdf")}><FileText className="h-4 w-4 mr-2" />PDF</a>
+            </Button>
+          </>
+        )}
+      </div>
+
+      {loading && <p className="text-muted-foreground">Memuat...</p>}
+
+      {data && dosen && (
+        <>
+          <div className="grid grid-cols-4 gap-4">
+            <Card><CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">Total SKS</p>
+              <p className="text-2xl font-bold">{dosen.totalSks}</p>
+            </CardContent></Card>
+            <Card><CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">Progress</p>
+              <p className="text-2xl font-bold">{dosen.totalPublished}/{dosen.totalTarget}</p>
+            </CardContent></Card>
+            <Card><CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">Daring / Luring</p>
+              <p className="text-2xl font-bold">{dosen.daringCount} / {dosen.luringCount}</p>
+            </CardContent></Card>
+            <Card><CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">Rata-rata Hadir</p>
+              <p className="text-2xl font-bold">{dosen.avgAttendance}%</p>
+            </CardContent></Card>
+          </div>
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">Detail per MK</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>MK</TableHead><TableHead>SKS</TableHead><TableHead>Published</TableHead><TableHead>Target</TableHead><TableHead>Progress</TableHead><TableHead>Daring</TableHead><TableHead>Luring</TableHead><TableHead>Hadir%</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dosen.courses.map((c, i) => (
+                    <TableRow key={i}>
+                      <TableCell><span className="font-medium">{c.code}</span><br /><span className="text-xs text-muted-foreground">{c.name}</span></TableCell>
+                      <TableCell>{c.sks}</TableCell><TableCell>{c.published}</TableCell><TableCell>{c.target}</TableCell>
+                      <TableCell><Badge variant={c.published >= c.target ? "default" : "secondary"}>{c.progressPercent}%</Badge></TableCell>
+                      <TableCell>{c.daring}</TableCell><TableCell>{c.luring}</TableCell><TableCell>{c.avgAttendance}%</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {data && !dosen && <p className="text-muted-foreground">Belum ada data untuk semester ini.</p>}
+    </div>
+  )
+}
