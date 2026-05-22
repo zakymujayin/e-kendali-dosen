@@ -61,7 +61,7 @@ export async function GET(req: Request) {
           teachingLoad: {
             include: {
               user: { select: { id: true, name: true, nidn: true } },
-              course: { select: { id: true, name: true, code: true, sks: true } },
+              course: { select: { id: true, name: true, code: true, sks: true, prodi: { select: { id: true, name: true } } } },
               semester: { select: { id: true, name: true, year: true, term: true } },
             },
           },
