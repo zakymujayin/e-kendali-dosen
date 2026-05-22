@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { successResponse, errorResponse, unauthorized, notFound, forbidden } from "@/lib/api"
+import { unlink } from "fs/promises"
+import { join } from "path"
 
 export async function GET(
   _req: Request,
@@ -40,6 +42,14 @@ export async function DELETE(
     if (!doc) return notFound()
     if (doc.session.teachingLoad.userId !== session.user.id) return forbidden()
     if (doc.session.status !== "DRAFT") return errorResponse("Hanya bisa menghapus dokumen pada sesi DRAFT", 400)
+
+    // Delete file from disk
+    try {
+      const filePath = join(process.cwd(), "public", doc.fileUrl)
+      await unlink(filePath)
+    } catch {
+      // File already removed or never existed
+    }
 
     await prisma.document.delete({ where: { id } })
 

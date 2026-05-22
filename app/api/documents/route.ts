@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { successResponse, errorResponse, unauthorized, notFound, forbidden } from "@/lib/api"
+import { writeFile, mkdir } from "fs/promises"
+import { join } from "path"
 
 export async function POST(req: Request) {
   try {
@@ -30,11 +32,24 @@ export async function POST(req: Request) {
       return errorResponse("File maksimal 10MB", 400)
     }
 
+    // Save file to disk
+    const timestamp = Date.now()
+    const safeFilename = `${timestamp}-${file.name}`
+    const uploadDir = join(process.cwd(), "public", "uploads", "documents", sessionId)
+    const filePath = join(uploadDir, safeFilename)
+
+    await mkdir(uploadDir, { recursive: true })
+
+    const bytes = await file.arrayBuffer()
+    await writeFile(filePath, Buffer.from(bytes))
+
+    const fileUrl = `/uploads/documents/${sessionId}/${safeFilename}`
+
     const doc = await prisma.document.create({
       data: {
         sessionId,
         name: file.name,
-        fileUrl: `/api/documents/${sessionId}/${file.name}`,
+        fileUrl,
         fileType: ext,
         fileSize: file.size,
       },
