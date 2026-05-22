@@ -1,36 +1,62 @@
-import * as XLSX from "xlsx"
+import ExcelJS from "exceljs"
 
-export function parseExcel<T>(buffer: ArrayBuffer): T[] {
-  const workbook = XLSX.read(buffer, { type: "array" })
-  const sheetName = workbook.SheetNames[0]
-  const sheet = workbook.Sheets[sheetName]
-  return XLSX.utils.sheet_to_json(sheet) as T[]
+export async function parseExcel<T>(buffer: ArrayBuffer): Promise<T[]> {
+  const workbook = new ExcelJS.Workbook()
+  await workbook.xlsx.load(buffer)
+  const worksheet = workbook.worksheets[0]
+  if (!worksheet) return []
+
+  const headers: string[] = []
+  const headerRow = worksheet.getRow(1)
+  headerRow.eachCell((cell) => {
+    headers.push(String(cell.value ?? ""))
+  })
+
+  const rows: T[] = []
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return
+    const obj: Record<string, unknown> = {}
+    row.eachCell((cell, colNumber) => {
+      obj[headers[colNumber - 1]] = cell.value
+    })
+    rows.push(obj as T)
+  })
+
+  return rows
 }
 
-export function generateExcel(
-  data: Record<string, any>[],
+export async function generateExcel(
+  data: Record<string, unknown>[],
   sheetName: string = "Sheet1"
-): Buffer {
-  const worksheet = XLSX.utils.json_to_sheet(data)
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
-  return Buffer.from(XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }))
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet(sheetName)
+
+  if (data.length === 0) {
+    const buffer = await workbook.xlsx.writeBuffer()
+    return Buffer.from(buffer)
+  }
+
+  const headers = Object.keys(data[0])
+  worksheet.addRow(headers)
+
+  for (const item of data) {
+    worksheet.addRow(headers.map((h) => item[h]))
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer()
+  return Buffer.from(buffer)
 }
 
-export function generateTemplateExcel(
+export async function generateTemplateExcel(
   columns: { header: string; key: string }[],
   sheetName: string = "Template"
-): Buffer {
-  const data = columns.reduce((acc, col) => {
-    acc[col.header] = ""
-    return acc
-  }, {} as Record<string, string>)
+): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet(sheetName)
+  worksheet.addRow(columns.map((c) => c.header))
+  worksheet.columns = columns.map(() => ({ width: 25 }))
 
-  const worksheet = XLSX.utils.json_to_sheet([data])
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
-
-  worksheet["!cols"] = columns.map(() => ({ wch: 25 }))
-
-  return Buffer.from(XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }))
+  const buffer = await workbook.xlsx.writeBuffer()
+  return Buffer.from(buffer)
 }

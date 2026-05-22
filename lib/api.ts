@@ -43,6 +43,13 @@ export function errorValidation(errors: Record<string, string>, message?: string
   )
 }
 
+export function notFound(message: string = "Not found") {
+  return NextResponse.json(
+    { success: false, message },
+    { status: 404 }
+  )
+}
+
 export function unauthorized() {
   return NextResponse.json(
     { success: false, message: "Unauthorized" },

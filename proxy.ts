@@ -1,5 +1,6 @@
-import { auth } from "@/lib/auth"
+import { getToken } from "next-auth/jwt"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import type { Role } from "@prisma/client"
 
 const publicPaths = [
@@ -18,17 +19,17 @@ const roleRedirects: Record<string, string> = {
   DEKANAT: "/dashboard/dekanat",
 }
 
-export default auth((req) => {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
-  const isApi = pathname.startsWith("/api/")
   const isAuthApi = pathname.startsWith("/api/auth/")
+  const isApi = pathname.startsWith("/api/")
   const isStatic = pathname.startsWith("/_next") || pathname === "/favicon.ico"
 
   if (isStatic || isAuthApi) return
 
-  const session = req.auth
-  const user = session?.user
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const user = token as { role: Role; id: string; prodiId?: string | null } | null
 
   if (!user && !isPublic && !isApi) {
     return NextResponse.redirect(new URL("/login", req.url))
@@ -66,7 +67,7 @@ export default auth((req) => {
       return NextResponse.redirect(new URL(roleRedirects[user.role as string] || "/login", req.url))
     }
   }
-})
+}
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
@@ -18,10 +18,10 @@ import {
   X,
   LogOut,
   User,
-  ChevronDown,
   ClipboardList,
   BarChart3,
   Download,
+  CheckCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -35,6 +35,15 @@ interface UserData {
   role: Role
   prodiId?: string | null
   image?: string | null
+}
+
+interface NotificationItem {
+  id: string
+  title: string
+  message: string
+  type: string
+  isRead: boolean
+  createdAt: string
 }
 
 const roleMenus: Record<string, { label: string; href: string; icon: React.ElementType }[]> = {
@@ -76,6 +85,9 @@ export function DashboardLayoutClient({
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [notifLoading, setNotifLoading] = useState(false)
   const menus = roleMenus[user.role] || roleMenus.DOSEN
 
   const roleColors: Record<string, string> = {
@@ -83,6 +95,52 @@ export function DashboardLayoutClient({
     DOSEN: "bg-blue-100 text-blue-800",
     GKM: "bg-green-100 text-green-800",
     DEKANAT: "bg-purple-100 text-purple-800",
+  }
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/notifications/unread-count")
+      const data = await res.json()
+      if (data.success) setUnreadCount(data.data.count)
+    } catch {}
+  }, [])
+
+  const fetchNotifications = useCallback(async () => {
+    setNotifLoading(true)
+    try {
+      const res = await fetch("/api/notifications?limit=10")
+      const data = await res.json()
+      if (data.success) setNotifications(data.data)
+    } catch {}
+    setNotifLoading(false)
+  }, [])
+
+  useEffect(() => {
+    fetchUnreadCount()
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
+  }, [fetchUnreadCount])
+
+  useEffect(() => {
+    if (notifOpen) fetchNotifications()
+  }, [notifOpen, fetchNotifications])
+
+  async function markAsRead(id: string) {
+    try {
+      await fetch(`/api/notifications/${id}/read`, { method: "PUT" })
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      )
+      setUnreadCount((prev) => Math.max(0, prev - 1))
+    } catch {}
+  }
+
+  async function markAllAsRead() {
+    try {
+      await fetch("/api/notifications/read-all", { method: "PUT" })
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+      setUnreadCount(0)
+    } catch {}
   }
 
   return (
@@ -164,18 +222,68 @@ export function DashboardLayoutClient({
               className="relative p-2 rounded-lg hover:bg-gray-100"
             >
               <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs">
-                0
-              </Badge>
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </Badge>
+              )}
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg">
-                <div className="p-3 border-b">
+              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg z-50">
+                <div className="p-3 border-b flex items-center justify-between">
                   <p className="font-semibold text-sm">Notifikasi</p>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-xs text-primary hover:underline flex items-center gap-1"
+                    >
+                      <CheckCheck className="h-3 w-3" />
+                      Baca semua
+                    </button>
+                  )}
                 </div>
-                <div className="p-6 text-center text-sm text-gray-500">
-                  Tidak ada notifikasi
+                <div className="max-h-96 overflow-y-auto">
+                  {notifLoading ? (
+                    <div className="p-6 text-center text-sm text-gray-500">
+                      Memuat...
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-gray-500">
+                      Tidak ada notifikasi
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <button
+                        key={n.id}
+                        onClick={() => markAsRead(n.id)}
+                        className={cn(
+                          "w-full text-left p-3 border-b last:border-0 hover:bg-gray-50 transition-colors",
+                          !n.isRead && "bg-blue-50/50"
+                        )}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">{n.title}</p>
+                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                              {n.message}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {new Date(n.createdAt).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          </div>
+                          {!n.isRead && (
+                            <span className="h-2 w-2 rounded-full bg-blue-500 mt-1 shrink-0" />
+                          )}
+                        </div>
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             )}
