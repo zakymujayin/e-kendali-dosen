@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Pencil, Trash2, FileDown } from "lucide-react"
+import { Plus, Pencil, Trash2, FileDown, FileText } from "lucide-react"
 import { METHOD_LABELS } from "@/lib/constants"
 
 interface SessionData {
@@ -48,9 +48,18 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
     }
   }
 
+  const publishedCount = sessions.filter((s) => s.status === "PUBLISHED").length
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {publishedCount > 0 && (
+          <Button variant="outline" asChild>
+            <a href={`/api/reports/bap-batch?teachingLoadId=${teachingLoadId}`} target="_blank">
+              <FileText className="h-4 w-4 mr-2" /> Download Semua BAP
+            </a>
+          </Button>
+        )}
         <Button onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/new`)}>
           <Plus className="h-4 w-4 mr-2" /> Tambah Sesi
         </Button>

@@ -179,3 +179,44 @@ export async function generateBapPdf(data: BapData): Promise<Buffer> {
     pdfDoc.end()
   })
 }
+
+export async function generateBapBatchPdf(
+  sessions: Array<{
+    meetingNumber: number; date: string; startTime: string; endTime: string
+    topic: string; method: string; sessionType: string
+    studentPresent: number; studentAbsent: number; studentTotal: number
+    notes: string | null
+  }>,
+  courseInfo: { code: string; name: string; sks: number },
+  dosenInfo: { name: string; nidn: string | null },
+  prodiName: string,
+  semesterName: string
+): Promise<Buffer> {
+  const pdfBuffers: Buffer[] = []
+  for (const s of sessions) {
+    const buf = await generateBapPdf({
+      universityName: "Universitas",
+      prodiName,
+      courseCode: courseInfo.code,
+      courseName: courseInfo.name,
+      courseSks: courseInfo.sks,
+      dosenName: dosenInfo.name,
+      dosenNidn: dosenInfo.nidn || "-",
+      semesterName,
+      meetingNumber: s.meetingNumber,
+      date: s.date,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      topic: s.topic,
+      methodLabel: s.method,
+      sessionType: s.sessionType === "NORMAL" ? "Normal" : s.sessionType === "PENGGANTI" ? "Pengganti" : "Tambahan",
+      studentPresent: s.studentPresent,
+      studentAbsent: s.studentAbsent,
+      studentTotal: s.studentTotal,
+      notes: s.notes,
+    })
+    pdfBuffers.push(buf)
+  }
+
+  return Buffer.concat(pdfBuffers)
+}

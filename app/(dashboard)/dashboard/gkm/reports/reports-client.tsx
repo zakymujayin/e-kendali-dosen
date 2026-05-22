@@ -81,6 +81,16 @@ export function GKMLaporanClient({ prodiName, prodiId, semesters, activeSemester
             <Button variant="outline" asChild>
               <a href={exportUrl("pdf")}><FileText className="h-4 w-4 mr-2" />PDF</a>
             </Button>
+            <Button variant="outline" asChild>
+              <a href={`/api/reports/attendance?semesterId=${semesterId}&prodiId=${prodiId}&format=excel`}>
+                <Download className="h-4 w-4 mr-2" />Rekap Hadir
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href={`/api/reports/daring-usage?semesterId=${semesterId}&prodiId=${prodiId}&format=excel`}>
+                <Download className="h-4 w-4 mr-2" />Rekap Daring
+              </a>
+            </Button>
           </>
         )}
       </div>
