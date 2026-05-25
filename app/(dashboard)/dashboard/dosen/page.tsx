@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma"
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription
 } from "@/components/ui/card"
-import { BookOpen, Clock, AlertTriangle, Plus, ArrowRight } from "lucide-react"
+import { BookOpen, Clock, AlertTriangle, Plus } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 
 export default async function DosenDashboardPage() {
@@ -82,37 +83,19 @@ export default async function DosenDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="flex flex-wrap gap-3">
         {firstUnfinishedCourseId ? (
-          <Link href={`/dashboard/dosen/courses/${firstUnfinishedCourseId}/sessions/new`} className="group block">
-            <Card className="hover:shadow-md transition-all hover:-translate-y-0.5 border-l-4 border-green-500 bg-green-50">
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                  <Plus className="h-5 w-5 text-green-600" aria-hidden="true" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-base">Buat Sesi Hari Ini</p>
-                  <p className="text-sm text-muted-foreground">Isi sesi perkuliahan untuk hari ini</p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-green-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all shrink-0" aria-hidden="true" />
-              </CardContent>
-            </Card>
-          </Link>
+          <Button asChild size="lg" className="flex-1 min-w-[200px]">
+            <Link href={`/dashboard/dosen/courses/${firstUnfinishedCourseId}/sessions/new`}>
+              <Plus className="h-5 w-5 mr-2" /> Buat Sesi Hari Ini
+            </Link>
+          </Button>
         ) : null}
-        <Link href="/dashboard/dosen/courses" className="group block">
-          <Card className="hover:shadow-md transition-all hover:-translate-y-0.5 border-l-4 border-blue-500 bg-blue-50">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                <BookOpen className="h-5 w-5 text-blue-600" aria-hidden="true" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-base">Lihat Semua MK Saya</p>
-                <p className="text-sm text-muted-foreground">{teachingLoads.length} mata kuliah</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-blue-600 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all shrink-0" aria-hidden="true" />
-            </CardContent>
-          </Card>
-        </Link>
+        <Button asChild variant="outline" size="lg" className="flex-1 min-w-[200px]">
+          <Link href="/dashboard/dosen/courses">
+            <BookOpen className="h-5 w-5 mr-2" /> Lihat Semua MK Saya
+          </Link>
+        </Button>
       </div>
 
       <div>
