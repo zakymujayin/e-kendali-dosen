@@ -42,6 +42,23 @@ export default async function DosenDashboardPage() {
     <div className="space-y-6 animate-fade-in-up">
       <h1 className="text-2xl font-bold tracking-tight">Dashboard Dosen</h1>
 
+      {/* Quick Actions */}
+      {firstUnfinishedCourseId && (
+        <div className="flex flex-col items-start gap-2">
+          <Button asChild size="default">
+            <Link href={`/dashboard/dosen/courses/${firstUnfinishedCourseId}/sessions/new`}>
+              <Plus className="h-5 w-5 mr-2" /> Buat Sesi Hari Ini
+            </Link>
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            atau{" "}
+            <Link href="/dashboard/dosen/courses" className="text-primary hover:underline">
+              lihat semua MK Saya →
+            </Link>
+          </p>
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="hover:shadow-md transition-shadow border-l-4 border-teal-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -81,29 +98,12 @@ export default async function DosenDashboardPage() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      {firstUnfinishedCourseId && (
-        <div className="flex flex-col items-start gap-2">
-          <Button asChild size="default">
-            <Link href={`/dashboard/dosen/courses/${firstUnfinishedCourseId}/sessions/new`}>
-              <Plus className="h-5 w-5 mr-2" /> Buat Sesi Hari Ini
-            </Link>
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            atau{" "}
-            <Link href="/dashboard/dosen/courses" className="text-primary hover:underline">
-              lihat semua MK Saya →
-            </Link>
-          </p>
-        </div>
-      )}
-
       <div>
         <h2 className="text-lg font-semibold mb-3">Progress MK</h2>
         {teachingLoads.length === 0 ? (
           <p className="text-muted-foreground">Belum ada penugasan MK.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {teachingLoads.map((tl) => {
               const published = tl.sessions.length
               const total = tl.course.totalMeeting
