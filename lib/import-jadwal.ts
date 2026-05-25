@@ -114,6 +114,9 @@ export function mapColumns(raw: Record<string, unknown>): RawRow {
   const semesterKey = findKey(["SEMESTER"])
   const prodiKey = findKey(["PRODI"])
   const kelasKey = findKey(["KELAS"])
+  const ruangKey = findKey(["RUANG KELAS"])
+  const hariKey = findKey(["HARI"])
+  const waktuKey = findKey(["WAKTU"])
 
   return {
     NO: noKey ? Number(raw[noKey]) || null : null,
@@ -124,6 +127,9 @@ export function mapColumns(raw: Record<string, unknown>): RawRow {
     SEMESTER: semesterKey ? String(raw[semesterKey] ?? "") || null : null,
     PRODI: prodiKey ? String(raw[prodiKey] ?? "") || null : null,
     KELAS: kelasKey ? String(raw[kelasKey] ?? "") || null : null,
+    RUANG_KELAS: ruangKey ? String(raw[ruangKey] ?? "") || null : null,
+    HARI: hariKey ? String(raw[hariKey] ?? "") || null : null,
+    WAKTU: waktuKey ? String(raw[waktuKey] ?? "") || null : null,
   }
 }
 
@@ -298,4 +304,63 @@ export async function matchCourses(
   }
 
   return results
+}
+
+export interface ScheduleEntry {
+  semesterId: string
+  userId: string
+  courseId: string
+  prodiId: string
+  roomName: string
+  className: string
+  day: string
+  startTime: string
+  endTime: string
+}
+
+export function extractScheduleEntries(
+  rows: RawRow[],
+  semesterId: string,
+  dosenMap: Map<string, string>,
+  courseMap: Map<string, string>,
+  prodiMap: Map<string, string>
+): ScheduleEntry[] {
+  return rows.reduce<ScheduleEntry[]>((acc, row) => {
+    const dosenId = row.NAMA_DOSEN ? dosenMap.get(normalizeName(row.NAMA_DOSEN)) : undefined
+    const courseId = row.KODE_MK ? courseMap.get(row.KODE_MK) : undefined
+    const prodiCode = row.PRODI ? String(row.PRODI) : ""
+    const prodiId = prodiCode ? prodiMap.get(prodiCode) : undefined
+    const ruang = row.RUANG_KELAS ? String(row.RUANG_KELAS) : ""
+    const kelas = row.KELAS ? String(row.KELAS) : ""
+    const hari = row.HARI ? String(row.HARI) : ""
+    const waktu = row.WAKTU ? String(row.WAKTU) : ""
+
+    if (!dosenId || !courseId || !prodiId || !ruang || !hari || !waktu) return acc
+
+    const [startTime, endTime] = waktu.split("-").map((t: string) => t.trim())
+
+    acc.push({
+      semesterId, userId: dosenId, courseId, prodiId,
+      roomName: ruang, className: kelas,
+      day: hari.toUpperCase(), startTime: startTime || "", endTime: endTime || "",
+    })
+
+    return acc
+  }, [])
+}
+
+export async function saveScheduleSlots(entries: ScheduleEntry[]): Promise<number> {
+  if (entries.length === 0) return 0
+  const { prisma } = await import("./prisma")
+
+  await prisma.scheduleSlot.deleteMany({
+    where: { semesterId: entries[0].semesterId },
+  })
+
+  const result = await prisma.scheduleSlot.createMany({
+    data: entries,
+    skipDuplicates: true,
+  })
+
+  return result.count
 }

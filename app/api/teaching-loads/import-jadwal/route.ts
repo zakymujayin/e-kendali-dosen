@@ -8,6 +8,8 @@ import {
   buildTeachingLoads,
   matchDosen,
   matchCourses,
+  extractScheduleEntries,
+  saveScheduleSlots,
 } from "@/lib/import-jadwal"
 import bcrypt from "bcryptjs"
 
@@ -161,6 +163,14 @@ export async function POST(req: Request) {
       }
     }
 
+    // Save schedule slots
+    const prodiList = await prisma.prodi.findMany({ select: { id: true, code: true } })
+    const prodiMap = new Map<string, string>()
+    for (const p of prodiList) prodiMap.set(p.code, p.id)
+
+    const scheduleEntries = extractScheduleEntries(rows, semesterId, finalDosenMap, courseMap, prodiMap)
+    const scheduleSaved = await saveScheduleSlots(scheduleEntries)
+
     return Response.json({
       success: true,
       data: {
@@ -170,6 +180,7 @@ export async function POST(req: Request) {
         coursesCreated,
         coursesSkipped,
         teachingLoadsCreated,
+        scheduleSaved,
         errors,
       },
     })
