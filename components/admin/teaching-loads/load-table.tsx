@@ -11,8 +11,9 @@ import { Badge } from "@/components/ui/badge"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
-import { Plus, Trash2, AlertTriangle } from "lucide-react"
+import { Plus, Trash2, AlertTriangle, Upload } from "lucide-react"
 import { AssignForm } from "./assign-form"
+import { ImportJadwalDialog } from "./import-jadwal-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface LoadData {
@@ -39,6 +40,7 @@ export function LoadTable({ users, courses, semesters }: Props) {
   const [loading, setLoading] = useState(true)
   const [semesterFilter, setSemesterFilter] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
 
   useEffect(() => {
     const active = semesters.find((s) => s.isActive)
@@ -123,6 +125,9 @@ export function LoadTable({ users, courses, semesters }: Props) {
           </SelectContent>
         </Select>
         <div className="flex-1" />
+        <Button variant="outline" onClick={() => setImportOpen(true)}>
+          <Upload className="h-4 w-4 mr-2" aria-hidden="true" /> Import Jadwal
+        </Button>
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah Penugasan
         </Button>
@@ -186,6 +191,11 @@ export function LoadTable({ users, courses, semesters }: Props) {
         courses={courses}
         semesters={semesters}
         onSuccess={() => { setDialogOpen(false); fetchData() }}
+      />
+      <ImportJadwalDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onSuccess={() => { setImportOpen(false); fetchData() }}
       />
     </div>
   )
