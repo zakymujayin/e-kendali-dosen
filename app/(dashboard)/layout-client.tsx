@@ -23,6 +23,7 @@ import {
   Download,
   CheckCheck,
   Building2,
+  QrCode,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -61,6 +62,7 @@ const roleMenus: Record<string, { label: string; href: string; icon: React.Eleme
   ],
   DOSEN: [
     { label: "Dashboard", href: "/dashboard/dosen", icon: LayoutDashboard },
+    { label: "Scan", href: "/scan", icon: QrCode },
     { label: "MK Saya", href: "/dashboard/dosen/courses", icon: BookOpen, badge: 0 },
     { label: "Laporan", href: "/dashboard/dosen/reports", icon: Download },
   ],
