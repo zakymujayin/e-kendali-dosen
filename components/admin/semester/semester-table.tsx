@@ -55,11 +55,11 @@ export function SemesterTable() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button onClick={() => { setEditSemester(null); setDialogOpen(true) }}>
-          <Plus className="h-4 w-4 mr-2" /> Tambah Semester
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah Semester
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -89,12 +89,12 @@ export function SemesterTable() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditSemester(s); setDialogOpen(true) }}>
-                      <Pencil className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => { setEditSemester(s); setDialogOpen(true) }}>
+                      <Pencil className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     {!s.isActive && (
-                      <Button variant="ghost" size="icon" onClick={() => handleActivate(s.id)}>
-                        <CheckCircle className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" aria-label="Aktifkan" onClick={() => handleActivate(s.id)}>
+                        <CheckCircle className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     )}
                   </div>

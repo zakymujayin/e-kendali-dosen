@@ -51,12 +51,12 @@ interface Props {
 export function MonitoringClient({ prodiList, allDosen }: Props) {
   const [sessions, setSessions] = useState<SessionItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedProdi, setSelectedProdi] = useState("")
-  const [selectedDosen, setSelectedDosen] = useState("")
+  const [selectedProdi, setSelectedProdi] = useState("all")
+  const [selectedDosen, setSelectedDosen] = useState("all")
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
 
-  const filteredDosen = selectedProdi
+  const filteredDosen = selectedProdi && selectedProdi !== "all"
     ? allDosen.filter((d) => d.prodiId === selectedProdi)
     : allDosen
 
@@ -64,8 +64,8 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      if (selectedProdi) params.set("prodiId", selectedProdi)
-      if (selectedDosen) params.set("userId", selectedDosen)
+      if (selectedProdi && selectedProdi !== "all") params.set("prodiId", selectedProdi)
+      if (selectedDosen && selectedDosen !== "all") params.set("userId", selectedDosen)
       params.set("limit", "200")
 
       const res = await fetch(`/api/sessions?${params.toString()}`)
@@ -95,44 +95,44 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Monitoring Perkuliahan &mdash; Dekanat</h1>
+    <div className="space-y-6 animate-fade-in-up">
+      <h1 className="text-2xl font-bold tracking-tight">Monitoring Perkuliahan &mdash; Dekanat</h1>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Sesi</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-3xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Published</CardTitle>
-            <div className="h-4 w-4 rounded-full bg-green-500" />
+            <div className="h-4 w-4 rounded-full bg-green-500" /><span className="sr-only">Published</span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.published}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Draft</CardTitle>
-            <div className="h-4 w-4 rounded-full bg-yellow-500" />
+            <div className="h-4 w-4 rounded-full bg-yellow-500" /><span className="sr-only">Draft</span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.draft}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Prodi</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.prodiCount}</div>
+            <div className="text-3xl font-bold">{stats.prodiCount}</div>
           </CardContent>
         </Card>
       </div>
@@ -140,10 +140,10 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
       <div className="flex flex-wrap gap-4 items-end">
         <div className="space-y-1">
           <Label className="text-xs">Prodi</Label>
-          <Select value={selectedProdi} onValueChange={(v) => { setSelectedProdi(v); setSelectedDosen("") }}>
-            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Semua Prodi" /></SelectTrigger>
+          <Select value={selectedProdi} onValueChange={(v) => { setSelectedProdi(v); setSelectedDosen("all") }}>
+            <SelectTrigger className="w-[200px]" aria-label="Filter prodi"><SelectValue placeholder="Semua Prodi" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Semua Prodi</SelectItem>
+              <SelectItem value="all">Semua Prodi</SelectItem>
               {prodiList.map((p) => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
               ))}
@@ -153,9 +153,9 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
         <div className="space-y-1">
           <Label className="text-xs">Dosen</Label>
           <Select value={selectedDosen} onValueChange={setSelectedDosen}>
-            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Semua Dosen" /></SelectTrigger>
+            <SelectTrigger className="w-[200px]" aria-label="Filter dosen"><SelectValue placeholder="Semua Dosen" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Semua Dosen</SelectItem>
+              <SelectItem value="all">Semua Dosen</SelectItem>
               {filteredDosen.map((d) => (
                 <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
               ))}
@@ -172,7 +172,7 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
         </div>
       </div>
 
-      <Card>
+      <Card className="hover:shadow-md transition-shadow">
         <CardHeader>
           <CardTitle className="text-base">Daftar Sesi Perkuliahan</CardTitle>
         </CardHeader>
@@ -193,7 +193,7 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground" aria-live="polite">
                     Memuat...
                   </TableCell>
                 </TableRow>

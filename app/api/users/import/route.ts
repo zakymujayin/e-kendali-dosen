@@ -27,11 +27,12 @@ export async function POST(req: Request) {
       const rowNum = i + 2
 
       const nama = row["Nama"] as string | undefined
+      const username = row["Username"] as string | undefined
       const email = row["Email"] as string | undefined
       const role = row["Role"] as string | undefined
 
-      if (!nama || !email || !role) {
-        errors.push(`Baris ${rowNum}: Nama, Email, dan Role wajib diisi`)
+      if (!nama || !username || !email || !role) {
+        errors.push(`Baris ${rowNum}: Nama, Username, Email, dan Role wajib diisi`)
         continue
       }
 
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
         await prisma.user.create({
           data: {
             name: nama,
+            username,
             email,
             password: hashed,
             role: role as "ADMIN" | "DOSEN" | "GKM" | "DEKANAT",

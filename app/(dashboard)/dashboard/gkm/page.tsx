@@ -36,40 +36,40 @@ export default async function GKMDashboardPage() {
   )
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard GKM — {prodi.name}</h1>
+    <div className="space-y-6 animate-fade-in-up">
+      <h1 className="text-2xl font-bold tracking-tight">Dashboard GKM — {prodi.name}</h1>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Dosen</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dosenCount}</div>
+            <div className="text-3xl font-bold">{dosenCount}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Penugasan MK</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <BookOpen className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalMK}</div>
+            <div className="text-3xl font-bold">{totalMK}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Sesi</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalSessions}</div>
+            <div className="text-3xl font-bold">{totalSessions}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="hover:shadow-md transition-shadow">
         <CardHeader>
           <CardTitle className="text-lg">Daftar Dosen</CardTitle>
         </CardHeader>

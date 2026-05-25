@@ -101,15 +101,15 @@ describe("sessionSchema", () => {
 describe("loginSchema", () => {
   it("passes for valid login", () => {
     const result = loginSchema.safeParse({
-      email: "dosen@example.com",
+      username: "dosen",
       password: "password123",
     })
     expect(result.success).toBe(true)
   })
 
-  it("fails for invalid email", () => {
+  it("fails for empty username", () => {
     const result = loginSchema.safeParse({
-      email: "not-an-email",
+      username: "",
       password: "password123",
     })
     expect(result.success).toBe(false)
@@ -117,7 +117,7 @@ describe("loginSchema", () => {
 
   it("fails for short password", () => {
     const result = loginSchema.safeParse({
-      email: "dosen@example.com",
+      username: "dosen",
       password: "12345",
     })
     expect(result.success).toBe(false)

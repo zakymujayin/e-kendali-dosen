@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     const data = await getBkdReport(filters)
     return successResponse(data)
   } catch (error) {
-    console.error("BKD report error:", error)
+    console.error("e-Kendali Dosen report error:", error)
     return errorResponse("Server error", 500)
   }
 }

@@ -39,28 +39,28 @@ export default async function CourseDetailPage({
     : 0
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl font-bold">{teachingLoad.course.name}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{teachingLoad.course.name}</h1>
         <p className="text-muted-foreground">
           {teachingLoad.course.code} · {teachingLoad.course.sks} SKS · {teachingLoad.semester.name} {teachingLoad.semester.year}
         </p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <p className="text-2xl font-bold">{publishedCount}/{teachingLoad.course.totalMeeting}</p>
             <p className="text-sm text-muted-foreground">Pertemuan Published</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <p className="text-2xl font-bold">{draftCount}</p>
             <p className="text-sm text-muted-foreground">Draft</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <p className="text-2xl font-bold">{progress}%</p>
             <p className="text-sm text-muted-foreground">Progress</p>

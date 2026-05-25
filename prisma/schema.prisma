@@ -50,19 +50,20 @@ model Faculty {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  prodi          Prodi[]
-  campusLocation CampusLocation?
+  prodi           Prodi[]
+  campusLocations CampusLocation[]
 
   @@map("faculties")
 }
 
 model CampusLocation {
   id           String   @id @default(cuid())
-  facultyId    String   @unique
+  facultyId    String
   latitude     Float
   longitude    Float
   radiusMeters Int      @default(300)
   label        String?
+  isActive     Boolean  @default(true)
   updatedById  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -108,6 +109,7 @@ model Semester {
 
 model User {
   id        String   @id @default(cuid())
+  username  String   @unique
   name      String
   email     String   @unique
   password  String

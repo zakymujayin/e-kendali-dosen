@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { successResponse, errorResponse, unauthorized } from "@/lib/api"
-import { isInCampusRadius, hitungJarakMeter } from "@/lib/gps"
+import { successResponse, errorResponse, unauthorized, notFound, forbidden } from "@/lib/api"
 
 export async function POST(req: Request) {
   try {
@@ -15,39 +14,69 @@ export async function POST(req: Request) {
       return errorResponse("latitude dan longitude wajib diisi")
     }
 
-    const campus = await prisma.campusLocation.findFirst()
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        prodi: { select: { facultyId: true } },
+      },
+    })
+    if (!user) return notFound("User tidak ditemukan")
 
-    if (!campus) {
+    const facultyId = user.prodi?.facultyId
+    if (!facultyId) {
       return successResponse({
         isInCampus: false,
         distance: 0,
-        campusLocation: null,
-        message: "Lokasi kampus belum diatur",
+        campusLocations: [],
+        message: "User tidak terdaftar pada fakultas manapun",
       })
     }
 
+    const campuses = await prisma.campusLocation.findMany({
+      where: { facultyId, isActive: true },
+    })
+
+    if (campuses.length === 0) {
+      return successResponse({
+        isInCampus: false,
+        distance: 0,
+        campusLocations: [],
+        message: "Lokasi kampus belum diatur untuk fakultas Anda",
+      })
+    }
+
+    const { hitungJarakMeter } = await import("@/lib/gps")
+    let minDistance = Infinity
+    let nearestCampus = campuses[0]
+
+    for (const campus of campuses) {
+      const distance = hitungJarakMeter(latitude, longitude, campus.latitude, campus.longitude)
+      if (distance < minDistance) {
+        minDistance = distance
+        nearestCampus = campus
+      }
+    }
+
+    const { isInCampusRadius } = await import("@/lib/gps")
     const isInside = isInCampusRadius(
       latitude,
       longitude,
-      campus.latitude,
-      campus.longitude,
-      campus.radiusMeters
-    )
-    const distance = hitungJarakMeter(
-      latitude,
-      longitude,
-      campus.latitude,
-      campus.longitude
+      nearestCampus.latitude,
+      nearestCampus.longitude,
+      nearestCampus.radiusMeters
     )
 
     return successResponse({
       isInCampus: isInside,
-      distance: Math.round(distance * 100) / 100,
-      campusLocation: {
-        lat: campus.latitude,
-        lng: campus.longitude,
-        radius: campus.radiusMeters,
-      },
+      distanceMeters: Math.round(minDistance * 100) / 100,
+      isValid: isInside,
+      campusLocations: campuses.map((c) => ({
+        lat: c.latitude,
+        lng: c.longitude,
+        radius: c.radiusMeters,
+        label: c.label,
+      })),
     })
   } catch (error) {
     console.error("Validate GPS error:", error)

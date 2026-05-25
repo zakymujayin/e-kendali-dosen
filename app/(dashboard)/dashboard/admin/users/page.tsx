@@ -13,8 +13,8 @@ export default async function UsersPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Data User</h1>
+    <div className="space-y-6 animate-fade-in-up" id="main-content">
+      <h1 className="text-2xl font-bold tracking-tight">Data User</h1>
       <UserTable faculties={faculties} />
     </div>
   )

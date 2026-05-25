@@ -65,9 +65,9 @@ export function AssignForm({ open, onOpenChange, users, courses, semesters, onSu
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Dosen</Label>
+            <Label htmlFor="userId">Dosen</Label>
             <Select value={userId} onValueChange={(v) => { setUserId(v); setCourseId("") }}>
-              <SelectTrigger><SelectValue placeholder="Pilih dosen" /></SelectTrigger>
+              <SelectTrigger id="userId"><SelectValue placeholder="Pilih dosen" /></SelectTrigger>
               <SelectContent>
                 {users.map((u) => (
                   <SelectItem key={u.id} value={u.id}>{u.name} ({u.nidn || "-"})</SelectItem>
@@ -76,9 +76,9 @@ export function AssignForm({ open, onOpenChange, users, courses, semesters, onSu
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Semester</Label>
+            <Label htmlFor="semesterId">Semester</Label>
             <Select value={semesterId} onValueChange={setSemesterId}>
-              <SelectTrigger><SelectValue placeholder="Pilih semester" /></SelectTrigger>
+              <SelectTrigger id="semesterId"><SelectValue placeholder="Pilih semester" /></SelectTrigger>
               <SelectContent>
                 {semesters.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
@@ -89,9 +89,9 @@ export function AssignForm({ open, onOpenChange, users, courses, semesters, onSu
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Mata Kuliah</Label>
+            <Label htmlFor="courseId">Mata Kuliah</Label>
             <Select value={courseId} onValueChange={setCourseId} disabled={!userId}>
-              <SelectTrigger><SelectValue placeholder="Pilih MK" /></SelectTrigger>
+              <SelectTrigger id="courseId"><SelectValue placeholder="Pilih MK" /></SelectTrigger>
               <SelectContent>
                 {filteredCourses.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.code} - {c.name} ({c.sks} SKS)</SelectItem>
@@ -106,6 +106,7 @@ export function AssignForm({ open, onOpenChange, users, courses, semesters, onSu
             <button
               type="button"
               onClick={() => setIsTeam(!isTeam)}
+              aria-pressed={isTeam}
               className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${
                 isTeam ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input"
               }`}

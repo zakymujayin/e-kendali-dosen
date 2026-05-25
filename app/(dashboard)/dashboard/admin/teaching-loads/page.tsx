@@ -19,13 +19,13 @@ export default async function TeachingLoadsPage() {
     }),
     prisma.semester.findMany({
       select: { id: true, name: true, year: true, term: true, isActive: true },
-      orderBy: { year: "desc", term: "asc" },
+      orderBy: [{ year: "desc" }, { term: "asc" }],
     }),
   ])
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Penugasan Dosen</h1>
+    <div className="space-y-6 animate-fade-in-up" id="main-content">
+      <h1 className="text-2xl font-bold tracking-tight">Penugasan Dosen</h1>
       <LoadTable users={users} courses={courses} semesters={semesters} />
     </div>
   )

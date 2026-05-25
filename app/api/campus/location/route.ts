@@ -12,14 +12,15 @@ export async function GET(req: Request) {
     const facultyId = searchParams.get("facultyId")
 
     const where = facultyId ? { facultyId } : {}
-    const location = await prisma.campusLocation.findFirst({
+    const locations = await prisma.campusLocation.findMany({
       where,
       include: { faculty: { select: { id: true, name: true } } },
+      orderBy: { label: "asc" },
     })
 
-    return successResponse(location)
+    return successResponse(locations)
   } catch (error) {
-    console.error("Get campus location error:", error)
+    console.error("Get campus locations error:", error)
     return errorResponse("Server error", 500)
   }
 }
@@ -37,13 +38,6 @@ export async function POST(req: Request) {
       return errorResponse("facultyId, latitude, dan longitude wajib diisi")
     }
 
-    const existing = await prisma.campusLocation.findUnique({
-      where: { facultyId },
-    })
-    if (existing) {
-      return errorResponse("Lokasi kampus untuk fakultas ini sudah ada, gunakan PUT untuk mengupdate")
-    }
-
     const data = await prisma.campusLocation.create({
       data: {
         facultyId,
@@ -51,6 +45,7 @@ export async function POST(req: Request) {
         longitude,
         radiusMeters: radiusMeters ?? 300,
         label,
+        isActive: true,
         updatedById: session.user.id,
       },
       include: { faculty: { select: { id: true, name: true } } },
@@ -59,45 +54,6 @@ export async function POST(req: Request) {
     return successResponse(data, "Lokasi kampus berhasil disimpan")
   } catch (error) {
     console.error("Create campus location error:", error)
-    return errorResponse("Server error", 500)
-  }
-}
-
-export async function PUT(req: Request) {
-  try {
-    const session = await auth()
-    if (!session?.user?.id) return unauthorized()
-    if (session.user.role !== "ADMIN") return forbidden()
-
-    const body = await req.json()
-    const { facultyId, latitude, longitude, radiusMeters, label } = body
-
-    if (!facultyId || latitude == null || longitude == null) {
-      return errorResponse("facultyId, latitude, dan longitude wajib diisi")
-    }
-
-    const existing = await prisma.campusLocation.findUnique({
-      where: { facultyId },
-    })
-    if (!existing) {
-      return errorResponse("Lokasi kampus belum ada, gunakan POST untuk membuat")
-    }
-
-    const data = await prisma.campusLocation.update({
-      where: { facultyId },
-      data: {
-        latitude,
-        longitude,
-        radiusMeters: radiusMeters ?? 300,
-        label,
-        updatedById: session.user.id,
-      },
-      include: { faculty: { select: { id: true, name: true } } },
-    })
-
-    return successResponse(data, "Lokasi kampus berhasil diupdate")
-  } catch (error) {
-    console.error("Update campus location error:", error)
     return errorResponse("Server error", 500)
   }
 }

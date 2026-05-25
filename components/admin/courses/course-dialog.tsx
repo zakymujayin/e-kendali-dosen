@@ -110,9 +110,9 @@ export function CourseDialog({ open, onOpenChange, course, prodiList, semesters,
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Prodi</Label>
+            <Label htmlFor="prodiId">Prodi</Label>
             <Select value={prodiId} onValueChange={setProdiId} required>
-              <SelectTrigger><SelectValue placeholder="Pilih prodi" /></SelectTrigger>
+              <SelectTrigger id="prodiId"><SelectValue placeholder="Pilih prodi" /></SelectTrigger>
               <SelectContent>
                 {prodiList.map((p) => (
                   <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -121,9 +121,9 @@ export function CourseDialog({ open, onOpenChange, course, prodiList, semesters,
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Semester</Label>
+            <Label htmlFor="semesterId">Semester</Label>
             <Select value={semesterId} onValueChange={setSemesterId} required>
-              <SelectTrigger><SelectValue placeholder="Pilih semester" /></SelectTrigger>
+              <SelectTrigger id="semesterId"><SelectValue placeholder="Pilih semester" /></SelectTrigger>
               <SelectContent>
                 {semesters.map((s) => (
                   <SelectItem key={s.id} value={s.id}>{s.name} {s.year} - {s.term}</SelectItem>

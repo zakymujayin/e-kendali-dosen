@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     const data = await getBkdReport(filters)
     const buffer = await generateBkdExcel(data)
 
-    const filename = `Laporan_BKD_${data.semester?.name || "semester"}_${data.semester?.year || ""}.xlsx`.replace(/\s+/g, "_")
+    const filename = `Laporan_E-Kendali_Dosen_${data.semester?.name || "semester"}_${data.semester?.year || ""}.xlsx`.replace(/\s+/g, "_")
 
     return new Response(buffer as BodyInit, {
       headers: {

@@ -55,17 +55,17 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
       <div className="flex justify-end gap-2">
         {publishedCount > 0 && (
           <Button variant="outline" asChild>
-            <a href={`/api/reports/bap-batch?teachingLoadId=${teachingLoadId}`} target="_blank">
-              <FileText className="h-4 w-4 mr-2" /> Download Semua BAP
+            <a href={`/api/reports/bap-batch?teachingLoadId=${teachingLoadId}`} target="_blank" rel="noopener noreferrer" aria-label="Download Semua BAP">
+              <FileText className="h-4 w-4 mr-2" aria-hidden="true" /> Download Semua BAP
             </a>
           </Button>
         )}
-        <Button onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/new`)}>
-          <Plus className="h-4 w-4 mr-2" /> Tambah Sesi
+        <Button onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/new`)} aria-label="Tambah Sesi">
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah Sesi
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -107,15 +107,17 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                           variant="ghost"
                           size="icon"
                           onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/${s.id}/edit`)}
+                          aria-label="Edit"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" aria-hidden="true" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDelete(s.id, s.meetingNumber)}
+                          aria-label="Hapus"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </>
                     )}
@@ -124,8 +126,9 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                         variant="ghost"
                         size="icon"
                         onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/${s.id}`)}
+                        aria-label="Download BAP"
                       >
-                        <FileDown className="h-4 w-4" />
+                        <FileDown className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     )}
                   </div>
@@ -133,7 +136,7 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
               </TableRow>
             ))}
             {sessions.length === 0 && (
-              <TableRow>
+              <TableRow aria-live="polite">
                 <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   Belum ada sesi perkuliahan
                 </TableCell>

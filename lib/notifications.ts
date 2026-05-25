@@ -39,7 +39,7 @@ export async function sendEmailNotification(params: {
 
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || "noreply@bkd.app",
+      from: process.env.SMTP_FROM || "noreply@e-kendali.app",
       to: params.to,
       subject: params.subject,
       html: params.html,

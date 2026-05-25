@@ -49,9 +49,9 @@ export default async function SessionDetailPage({
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild aria-label="Kembali">
           <Link href={`/dashboard/dosen/courses/${courseId}`}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           </Link>
         </Button>
         <div>
@@ -145,7 +145,7 @@ export default async function SessionDetailPage({
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Globe className="h-4 w-4" /> URL Platform
+              <Globe className="h-4 w-4" aria-hidden="true" /> URL Platform
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -165,7 +165,7 @@ export default async function SessionDetailPage({
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <MapPin className="h-4 w-4" /> Lokasi GPS
+              <MapPin className="h-4 w-4" aria-hidden="true" /> Lokasi GPS
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
@@ -174,7 +174,7 @@ export default async function SessionDetailPage({
               <span>Lng: {lectureSession.longitude}</span>
             </div>
             {lectureSession.distanceMeters && (
-              <p>Jarak dari kampus: {Math.round(lectureSession.distanceMeters)}m</p>
+              <p>Jarak dari kampus terdekat: {Math.round(lectureSession.distanceMeters)}m</p>
             )}
             {lectureSession.gpsAccuracy && (
               <p>Akurasi: {lectureSession.gpsAccuracy}m</p>
@@ -201,7 +201,7 @@ export default async function SessionDetailPage({
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <FileText className="h-4 w-4" /> Dokumen ({lectureSession.documents.length})
+              <FileText className="h-4 w-4" aria-hidden="true" /> Dokumen ({lectureSession.documents.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -209,15 +209,15 @@ export default async function SessionDetailPage({
               {lectureSession.documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-2 border rounded">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <FileText className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <span className="text-sm">{doc.name}</span>
                     <span className="text-xs text-muted-foreground">
                       ({(doc.fileSize / 1024).toFixed(1)} KB)
                     </span>
                   </div>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild aria-label="Download Dokumen">
                     <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer">
-                      <Download className="h-4 w-4" />
+                      <Download className="h-4 w-4" aria-hidden="true" />
                     </a>
                   </Button>
                 </div>
@@ -230,8 +230,8 @@ export default async function SessionDetailPage({
       {lectureSession.status === "PUBLISHED" && (
         <div className="flex justify-end">
           <Button asChild>
-            <a href={`/api/sessions/${lectureSession.id}/bap`} target="_blank">
-              <Download className="h-4 w-4 mr-2" />
+            <a href={`/api/sessions/${lectureSession.id}/bap`} target="_blank" rel="noopener noreferrer">
+              <Download className="h-4 w-4 mr-2" aria-hidden="true" />
               Download BAP
             </a>
           </Button>

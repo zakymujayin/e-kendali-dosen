@@ -95,7 +95,7 @@ export function LoadTable({ users, courses, semesters }: Props) {
         <Card className="border-yellow-300 bg-yellow-50">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" />
+              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm font-medium text-yellow-800">Peringatan Beban SKS</p>
                 <ul className="text-sm text-yellow-700 mt-1 list-disc list-inside">
@@ -124,11 +124,11 @@ export function LoadTable({ users, courses, semesters }: Props) {
         </Select>
         <div className="flex-1" />
         <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Tambah Penugasan
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah Penugasan
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -169,8 +169,8 @@ export function LoadTable({ users, courses, semesters }: Props) {
                 </TableCell>
                 <TableCell>{load._count.sessions}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(load)}>
-                    <Trash2 className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" aria-label={`Hapus penugasan ${load.course.name}`} onClick={() => handleDelete(load)}>
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TableCell>
               </TableRow>

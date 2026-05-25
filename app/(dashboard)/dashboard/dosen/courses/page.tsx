@@ -57,12 +57,12 @@ export default async function DosenCoursesPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">MK Saya</h1>
+    <div className="space-y-6 animate-fade-in-up">
+      <h1 className="text-2xl font-bold tracking-tight">MK Saya</h1>
 
       {loadsWithProgress.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" aria-hidden="true" />
           <p>Belum ada mata kuliah yang ditugaskan</p>
         </div>
       ) : (

@@ -99,9 +99,9 @@ export function SemesterDialog({ open, onOpenChange, semester, onSuccess }: Prop
             <Input id="year" type="number" value={year} onChange={(e) => setYear(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Term</Label>
+            <Label htmlFor="term">Term</Label>
             <Select value={term} onValueChange={setTerm} required>
-              <SelectTrigger><SelectValue placeholder="Pilih term" /></SelectTrigger>
+              <SelectTrigger id="term"><SelectValue placeholder="Pilih term" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Ganjil">Ganjil</SelectItem>
                 <SelectItem value="Genap">Genap</SelectItem>

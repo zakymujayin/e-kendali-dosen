@@ -1,8 +1,9 @@
 import ExcelJS from "exceljs"
 
-export async function parseExcel<T>(buffer: ArrayBuffer): Promise<T[]> {
+export async function parseExcel<T>(buffer: ArrayBuffer | Buffer): Promise<T[]> {
   const workbook = new ExcelJS.Workbook()
-  await workbook.xlsx.load(buffer)
+  const data = buffer instanceof Buffer ? new Uint8Array(buffer.buffer as ArrayBuffer) : new Uint8Array(buffer)
+  await workbook.xlsx.load(data as any)
   const worksheet = workbook.worksheets[0]
   if (!worksheet) return []
 

@@ -54,8 +54,8 @@ export function GKMLaporanClient({ prodiName, prodiId, semesters, activeSemester
   } : null
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Laporan BKD &mdash; {prodiName}</h1>
+    <div className="space-y-6 animate-fade-in-up">
+      <h1 className="text-2xl font-bold tracking-tight">Laporan e-Kendali Dosen &mdash; {prodiName}</h1>
 
       <div className="flex flex-wrap items-end gap-4">
         <div className="space-y-1">
@@ -70,55 +70,55 @@ export function GKMLaporanClient({ prodiName, prodiId, semesters, activeSemester
           </Select>
         </div>
         <Button onClick={fetchData} disabled={loading || !semesterId}>
-          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" /> : null}
           Tampilkan
         </Button>
         {data && (
           <>
             <Button variant="outline" asChild>
-              <a href={exportUrl("excel")}><Download className="h-4 w-4 mr-2" />Excel</a>
+              <a href={exportUrl("excel")}><Download className="h-4 w-4 mr-2" aria-hidden="true" />Excel</a>
             </Button>
             <Button variant="outline" asChild>
-              <a href={exportUrl("pdf")}><FileText className="h-4 w-4 mr-2" />PDF</a>
+              <a href={exportUrl("pdf")}><FileText className="h-4 w-4 mr-2" aria-hidden="true" />PDF</a>
             </Button>
             <Button variant="outline" asChild>
               <a href={`/api/reports/attendance?semesterId=${semesterId}&prodiId=${prodiId}&format=excel`}>
-                <Download className="h-4 w-4 mr-2" />Rekap Hadir
+                <Download className="h-4 w-4 mr-2" aria-hidden="true" />Rekap Hadir
               </a>
             </Button>
             <Button variant="outline" asChild>
               <a href={`/api/reports/daring-usage?semesterId=${semesterId}&prodiId=${prodiId}&format=excel`}>
-                <Download className="h-4 w-4 mr-2" />Rekap Daring
+                <Download className="h-4 w-4 mr-2" aria-hidden="true" />Rekap Daring
               </a>
             </Button>
           </>
         )}
       </div>
 
-      {loading && <p className="text-muted-foreground">Memuat...</p>}
+      {loading && <p className="text-muted-foreground" aria-live="polite">Memuat...</p>}
 
       {data && stats && (
         <>
           <div className="grid grid-cols-4 gap-4">
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Dosen</p>
-              <p className="text-2xl font-bold flex items-center gap-2"><Users className="h-5 w-5" />{stats.totalDosen}</p>
+              <p className="text-3xl font-bold flex items-center gap-2"><Users className="h-5 w-5" aria-hidden="true" />{stats.totalDosen}</p>
             </CardContent></Card>
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Total MK</p>
-              <p className="text-2xl font-bold flex items-center gap-2"><BookOpen className="h-5 w-5" />{stats.totalMk}</p>
+              <p className="text-3xl font-bold flex items-center gap-2"><BookOpen className="h-5 w-5" aria-hidden="true" />{stats.totalMk}</p>
             </CardContent></Card>
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Progress</p>
-              <p className="text-2xl font-bold flex items-center gap-2"><CheckCircle2 className="h-5 w-5" />{stats.totalPublished}/{stats.totalTarget}</p>
+              <p className="text-3xl font-bold flex items-center gap-2"><CheckCircle2 className="h-5 w-5" aria-hidden="true" />{stats.totalPublished}/{stats.totalTarget}</p>
             </CardContent></Card>
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Rata-rata Progress</p>
-              <p className="text-2xl font-bold flex items-center gap-2"><Clock className="h-5 w-5" />{stats.totalTarget > 0 ? Math.round((stats.totalPublished / stats.totalTarget) * 100) : 0}%</p>
+              <p className="text-3xl font-bold flex items-center gap-2"><Clock className="h-5 w-5" aria-hidden="true" />{stats.totalTarget > 0 ? Math.round((stats.totalPublished / stats.totalTarget) * 100) : 0}%</p>
             </CardContent></Card>
           </div>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader><CardTitle className="text-base">Daftar Dosen</CardTitle></CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -129,7 +129,7 @@ export function GKMLaporanClient({ prodiName, prodiId, semesters, activeSemester
                 </TableHeader>
                 <TableBody>
                   {data.dosen.map((d) => (
-                    <><TableRow key={d.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setExpandedDosen(expandedDosen === d.id ? null : d.id)}>
+                    <><TableRow key={d.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setExpandedDosen(expandedDosen === d.id ? null : d.id)} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setExpandedDosen(expandedDosen === d.id ? null : d.id); e.preventDefault(); } }}>
                       <TableCell className="font-medium">{d.name}<br /><span className="text-xs text-muted-foreground">{d.nidn}</span></TableCell>
                       <TableCell>{d.totalMk}</TableCell><TableCell>{d.totalSks}</TableCell>
                       <TableCell><Badge variant={d.progressPercent >= 100 ? "default" : "secondary"}>{d.progressPercent}%</Badge></TableCell>
@@ -158,7 +158,7 @@ export function GKMLaporanClient({ prodiName, prodiId, semesters, activeSemester
                     )}</>
                   ))}
                   {data.dosen.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Belum ada data</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground" role="alert">Belum ada data</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>

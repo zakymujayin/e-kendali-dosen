@@ -257,10 +257,10 @@ export function SessionForm({
               "bg-blue-50 border-blue-200"
             }`}>
               <Wifi className={`h-4 w-4 ${
-                daringQuota.remaining === 0 ? "text-red-500" :
-                daringQuota.remaining <= 1 ? "text-yellow-500" :
-                "text-blue-500"
-              }`} />
+              daringQuota.remaining === 0 ? "text-red-500" :
+              daringQuota.remaining <= 1 ? "text-yellow-500" :
+              "text-blue-500"
+              }`} aria-hidden="true" />
               <span className="text-sm font-medium">
                 Sisa kuota daring: {daringQuota.remaining}/{MAX_DARING}
               </span>
@@ -313,8 +313,8 @@ export function SessionForm({
             <Input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} required placeholder="Materi perkuliahan" />
           </div>
 
-          <div className="space-y-2">
-            <Label>Metode</Label>
+          <fieldset className="space-y-2">
+            <legend className="sr-only">Metode</legend>
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground font-medium">Luring</p>
               <div className="flex flex-wrap gap-2">
@@ -323,6 +323,7 @@ export function SessionForm({
                     key={m}
                     type="button"
                     onClick={() => setMethod(m)}
+                    aria-pressed={method === m}
                     className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
                       method === m
                         ? "bg-green-100 border-green-500 text-green-800"
@@ -345,6 +346,7 @@ export function SessionForm({
                       type="button"
                       onClick={() => !disabled && setMethod(m)}
                       disabled={disabled && m !== method}
+                      aria-pressed={method === m}
                       className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
                         method === m
                           ? "bg-purple-100 border-purple-500 text-purple-800"
@@ -359,17 +361,17 @@ export function SessionForm({
                 })}
               </div>
             </div>
-          </div>
+          </fieldset>
 
           {!isDaring && method && (
             <div className="space-y-3 p-4 rounded-lg border bg-gray-50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
+                  <MapPin className="h-4 w-4 text-green-600" aria-hidden="true" />
                   <span className="text-sm font-medium">Validasi GPS</span>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={handleDetectGps} disabled={gpsStatus === "loading"}>
-                  <Crosshair className="h-4 w-4 mr-2" />
+                  <Crosshair className="h-4 w-4 mr-2" aria-hidden="true" />
                   {gpsStatus === "loading" ? "Mendeteksi..." : "Deteksi Lokasi Saya"}
                 </Button>
               </div>
@@ -383,19 +385,19 @@ export function SessionForm({
               )}
 
               {gpsStatus === "valid" && gpsDistance !== null && (
-                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 p-2 rounded">
-                  <MapPin className="h-4 w-4" />
+                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 p-2 rounded" aria-live="polite">
+                  <MapPin className="h-4 w-4" aria-hidden="true" />
                   <span>Lokasi valid &mdash; jarak {Math.round(gpsDistance)}m dari kampus ✓</span>
                 </div>
               )}
               {gpsStatus === "invalid" && gpsDistance !== null && (
-                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 p-2 rounded">
-                  <MapPin className="h-4 w-4" />
+                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 p-2 rounded" aria-live="polite">
+                  <MapPin className="h-4 w-4" aria-hidden="true" />
                   <span>Lokasi di luar area kampus &mdash; jarak {Math.round(gpsDistance)}m &gt; 300m ✗</span>
                 </div>
               )}
               {gpsStatus === "error" && (
-                <p className="text-xs text-red-500">Gagal validasi GPS. Coba lagi atau periksa izin lokasi.</p>
+                <p className="text-xs text-red-500" role="alert">Gagal validasi GPS. Coba lagi atau periksa izin lokasi.</p>
               )}
             </div>
           )}
@@ -403,7 +405,7 @@ export function SessionForm({
           {isDaring && method && (
             <div className="space-y-3 p-4 rounded-lg border bg-gray-50">
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-purple-600" />
+                <Globe className="h-4 w-4 text-purple-600" aria-hidden="true" />
                 <span className="text-sm font-medium">URL Platform</span>
               </div>
               <Input
@@ -413,7 +415,7 @@ export function SessionForm({
                 placeholder="https://zoom.us/j/..."
                 className={urlError ? "border-red-500" : ""}
               />
-              {urlError && <p className="text-xs text-red-500">{urlError}</p>}
+              {urlError && <p className="text-xs text-red-500" role="alert">{urlError}</p>}
               {platformUrl && !urlError && isValidUrl(platformUrl) && (
                 <p className="text-xs text-green-600">URL valid ✓</p>
               )}
@@ -425,8 +427,8 @@ export function SessionForm({
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label>Kehadiran Mahasiswa</Label>
+          <fieldset className="space-y-2">
+            <legend className="sr-only">Kehadiran Mahasiswa</legend>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1">
                 <Label htmlFor="present" className="text-xs">Hadir</Label>
@@ -455,7 +457,7 @@ export function SessionForm({
                 </div>
               </div>
             </div>
-          </div>
+          </fieldset>
 
           <div className="space-y-2">
             <Label htmlFor="notes">Catatan (opsional)</Label>
@@ -478,7 +480,7 @@ export function SessionForm({
               onClick={() => handleSubmit(false)}
               disabled={loading}
             >
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="h-4 w-4 mr-2" aria-hidden="true" />
               {loading ? "Menyimpan..." : "Simpan Draft"}
             </Button>
             <Button
@@ -486,7 +488,7 @@ export function SessionForm({
               onClick={() => handleSubmit(true)}
               disabled={loading}
             >
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 mr-2" aria-hidden="true" />
               {loading ? "Menyimpan..." : "Simpan & Publish"}
             </Button>
           </div>

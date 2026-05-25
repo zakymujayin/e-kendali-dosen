@@ -79,10 +79,13 @@ export function ImportDialog({ open, onOpenChange, onSuccess }: Props) {
         {step === "upload" && (
           <div className="space-y-4">
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click() }}
               className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => inputRef.current?.click()}
             >
-              <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" aria-hidden="true" />
               <p className="text-sm text-muted-foreground">Klik untuk upload file Excel</p>
               <p className="text-xs text-muted-foreground mt-1">Format: .xlsx</p>
             </div>
@@ -96,11 +99,11 @@ export function ImportDialog({ open, onOpenChange, onSuccess }: Props) {
         {step === "preview" && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
-              <FileSpreadsheet className="h-4 w-4" />
+              <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
               <span className="font-medium">{file?.name}</span>
             </div>
             <p className="text-sm text-muted-foreground">Pratinjau (5 baris pertama):</p>
-            <div className="rounded-md border max-h-48 overflow-auto">
+              <div className="rounded-md border bg-card max-h-48 overflow-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

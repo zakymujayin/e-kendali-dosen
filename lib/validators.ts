@@ -45,11 +45,12 @@ export const sessionSchema = z
   )
 
 export const loginSchema = z.object({
-  email: z.string().email("Email tidak valid"),
+  username: z.string().min(1, "Username wajib diisi"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 })
 
 export const userSchema = z.object({
+  username: z.string().min(1, "Username wajib diisi"),
   name: z.string().min(1, "Nama wajib diisi"),
   email: z.string().email("Email tidak valid"),
   password: z.string().min(6, "Password minimal 6 karakter").optional().nullable(),
@@ -59,7 +60,10 @@ export const userSchema = z.object({
   phone: z.string().optional().nullable(),
   prodiId: z.string().optional().nullable(),
   isActive: z.boolean().default(true),
-})
+}).refine(
+  (data) => (data.role === "DOSEN" || data.role === "GKM") ? !!data.prodiId : true,
+  { message: "Prodi wajib untuk role DOSEN dan GKM", path: ["prodiId"] }
+)
 
 export const prodiSchema = z.object({
   name: z.string().min(1, "Nama wajib diisi"),

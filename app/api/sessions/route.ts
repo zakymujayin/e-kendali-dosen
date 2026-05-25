@@ -118,18 +118,38 @@ export async function POST(req: Request) {
         return errorResponse("GPS wajib untuk sesi luring", 422)
       }
 
-      const campus = await prisma.campusLocation.findFirst()
-      if (!campus) {
-        return errorResponse("Lokasi kampus belum diatur", 422)
+      const userWithFaculty = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { prodi: { select: { facultyId: true } } },
+      })
+      const facultyId = userWithFaculty?.prodi?.facultyId
+      if (!facultyId) {
+        return errorResponse("User tidak terdaftar pada fakultas", 422)
+      }
+
+      const campuses = await prisma.campusLocation.findMany({
+        where: { facultyId, isActive: true },
+      })
+      if (campuses.length === 0) {
+        return errorResponse("Lokasi kampus belum diatur untuk fakultas Anda", 422)
       }
 
       const { hitungJarakMeter } = await import("@/lib/gps")
-      const jarak = hitungJarakMeter(latitude, longitude, campus.latitude, campus.longitude)
-      createData.distanceMeters = Math.round(jarak * 10) / 10
-      createData.isGpsValid = jarak <= campus.radiusMeters
+      let minJarak = Infinity
+      let nearestCampus = campuses[0]
+      for (const campus of campuses) {
+        const jarak = hitungJarakMeter(latitude, longitude, campus.latitude, campus.longitude)
+        if (jarak < minJarak) {
+          minJarak = jarak
+          nearestCampus = campus
+        }
+      }
+
+      createData.distanceMeters = Math.round(minJarak * 10) / 10
+      createData.isGpsValid = minJarak <= nearestCampus.radiusMeters
 
       if (!createData.isGpsValid) {
-        return errorResponse(`Lokasi Anda di luar area kampus (jarak ${Math.round(jarak)}m > ${campus.radiusMeters}m)`, 422)
+        return errorResponse(`Lokasi Anda di luar area kampus terdekat (jarak ${Math.round(minJarak)}m > ${nearestCampus.radiusMeters}m)`, 422)
       }
     }
 

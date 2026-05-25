@@ -7,16 +7,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        const { email, password } = credentials as {
-          email: string
+        const { username, password } = credentials as {
+          username: string
           password: string
         }
 
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await prisma.user.findUnique({ where: { username } })
         if (!user) return null
         if (!user.isActive) return null
 
@@ -35,11 +35,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt: ({ token, user }) => {
+    jwt: ({ token, user, trigger, session }) => {
       if (user) {
         token.id = user.id ?? ""
         token.role = user.role
         token.prodiId = user.prodiId
+      }
+      if (trigger === "update" && session?.name) {
+        token.name = session.name
       }
       return token
     },
@@ -48,6 +51,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string
         session.user.role = token.role as any
         session.user.prodiId = token.prodiId as string | null
+        session.user.name = token.name as string | null
+        session.user.email = token.email as string
+        session.user.image = token.picture as string
       }
       return session
     },

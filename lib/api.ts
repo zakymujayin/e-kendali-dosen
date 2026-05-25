@@ -69,13 +69,9 @@ export function requireRole(allowedRoles: Role[], userRole?: Role) {
   return allowedRoles.includes(userRole)
 }
 
-export async function getCampusLocation(facultyId?: string) {
-  if (facultyId) {
-    return prisma.campusLocation.findFirst({
-      where: { facultyId },
-    })
-  }
-  return prisma.campusLocation.findFirst()
+export async function getCampusLocations(facultyId?: string) {
+  const where = facultyId ? { facultyId } : {}
+  return prisma.campusLocation.findMany({ where })
 }
 
 export async function checkDaringQuota(

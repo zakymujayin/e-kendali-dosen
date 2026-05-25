@@ -51,11 +51,11 @@ export function ProdiTable({ prodi, faculties, users }: Props) {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button onClick={() => { setEditProdi(null); setDialogOpen(true) }}>
-          <Plus className="h-4 w-4 mr-2" /> Tambah Prodi
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah Prodi
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -79,14 +79,14 @@ export function ProdiTable({ prodi, faculties, users }: Props) {
                 <TableCell><Badge variant="secondary">{p._count.courses}</Badge></TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditProdi(p); setDialogOpen(true) }}>
-                      <Pencil className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => { setEditProdi(p); setDialogOpen(true) }}>
+                      <Pencil className="h-4 w-4" aria-hidden="true" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => { setAssignProdi(p); setAssignOpen(true) }}>
-                      <UserCog className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label="Atur GKM" onClick={() => { setAssignProdi(p); setAssignOpen(true) }}>
+                      <UserCog className="h-4 w-4" aria-hidden="true" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(p.id, p.name)}>
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label={`Hapus ${p.name}`} onClick={() => handleDelete(p.id, p.name)}>
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                 </TableCell>

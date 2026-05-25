@@ -34,35 +34,35 @@ export default async function DosenDashboardPage() {
   const totalSessions = teachingLoads.reduce((acc, tl) => acc + tl.sessions.length, 0)
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard Dosen</h1>
+    <div className="space-y-6 animate-fade-in-up">
+      <h1 className="text-2xl font-bold tracking-tight">Dashboard Dosen</h1>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">MK Diampu</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <BookOpen className="h-4 w-4 text-blue-500" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{teachingLoads.length}</div>
+            <div className="text-3xl font-bold">{teachingLoads.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Sesi Published</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-green-500" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalSessions}</div>
+            <div className="text-3xl font-bold">{totalSessions}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Sesi Draft Belum Publish</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <AlertTriangle className="h-4 w-4 text-orange-500" aria-hidden="true" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{draftCount}</div>
+            <div className="text-3xl font-bold">{draftCount}</div>
           </CardContent>
         </Card>
       </div>
@@ -82,7 +82,7 @@ export default async function DosenDashboardPage() {
                   href={`/dashboard/dosen/courses/${tl.course.id}`}
                   className="block"
                 >
-                  <Card className="hover:shadow-md transition-shadow">
+                  <Card className="hover:shadow-md transition-all hover:-translate-y-0.5 border-l-4 border-primary">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>

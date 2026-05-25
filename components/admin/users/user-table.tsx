@@ -18,6 +18,7 @@ import { ImportDialog } from "./import-dialog"
 
 interface UserData {
   id: string
+  username: string
   name: string
   email: string
   role: string
@@ -101,9 +102,9 @@ export function UserTable({ faculties }: Props) {
           </SelectContent>
         </Select>
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
-            placeholder="Cari nama atau email..."
+            placeholder="Cari nama, username, atau email..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             className="pl-10"
@@ -111,21 +112,22 @@ export function UserTable({ faculties }: Props) {
         </div>
         <div className="flex-1" />
         <Button variant="outline" onClick={() => window.open("/api/users/template")}>
-          <Download className="h-4 w-4 mr-2" /> Template
+          <Download className="h-4 w-4 mr-2" aria-hidden="true" /> Template
         </Button>
         <Button variant="outline" onClick={() => setImportOpen(true)}>
-          <Upload className="h-4 w-4 mr-2" /> Import
+          <Upload className="h-4 w-4 mr-2" aria-hidden="true" /> Import
         </Button>
         <Button onClick={() => router.push("/dashboard/admin/users/create")}>
-          <Plus className="h-4 w-4 mr-2" /> Tambah User
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah User
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nama</TableHead>
+              <TableHead>Username</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>NIDN</TableHead>
               <TableHead>Role</TableHead>
@@ -136,12 +138,13 @@ export function UserTable({ faculties }: Props) {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Memuat...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Memuat...</TableCell></TableRow>
             ) : data.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Tidak ada data user</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Tidak ada data user</TableCell></TableRow>
             ) : data.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.name}</TableCell>
+                <TableCell>{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.nidn || "-"}</TableCell>
                 <TableCell>
@@ -155,14 +158,14 @@ export function UserTable({ faculties }: Props) {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => router.push(`/dashboard/admin/users/${user.id}/edit`)}>
-                      <Pencil className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => router.push(`/dashboard/admin/users/${user.id}/edit`)}>
+                      <Pencil className="h-4 w-4" aria-hidden="true" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleToggleActive(user)}>
-                      {user.isActive ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
+                    <Button variant="ghost" size="icon" aria-label={user.isActive ? "Nonaktifkan" : "Aktifkan"} onClick={() => handleToggleActive(user)}>
+                      {user.isActive ? <PowerOff className="h-4 w-4" aria-hidden="true" /> : <Power className="h-4 w-4" aria-hidden="true" />}
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id, user.name)}>
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label={`Hapus ${user.name}`} onClick={() => handleDelete(user.id, user.name)}>
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                 </TableCell>
@@ -172,18 +175,20 @@ export function UserTable({ faculties }: Props) {
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Total: {total} user</p>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            Sebelumnya
-          </Button>
-          <span className="flex items-center text-sm px-2">{page} / {totalPages || 1}</span>
-          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
-            Selanjutnya
-          </Button>
+      {!loading && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Total: {total} user</p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+              Sebelumnya
+            </Button>
+            <span className="flex items-center text-sm px-2">{page} / {totalPages || 1}</span>
+            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+              Selanjutnya
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} onSuccess={() => { setImportOpen(false); fetchData() }} />
     </div>

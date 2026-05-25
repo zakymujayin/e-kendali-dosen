@@ -39,8 +39,8 @@ export function CourseCard({
   daringQuota,
 }: CourseCardProps) {
   return (
-    <Link href={`/dashboard/dosen/courses/${course.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+    <Link href={`/dashboard/dosen/courses/${course.id}`} tabIndex={0}>
+      <Card className="hover:shadow-md transition-shadow cursor-pointer focus-visible:ring-2 focus-visible:ring-ring">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div>
@@ -65,7 +65,7 @@ export function CourseCard({
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+                <Clock className="h-3 w-3" aria-hidden="true" />
                 {publishedSessions} published · {draftSessions} draft
               </span>
               {semester && (
@@ -77,7 +77,7 @@ export function CourseCard({
 
             {daringQuota && (
               <div className="flex items-center gap-1.5 text-xs">
-                <Wifi className={`h-3 w-3 ${daringQuota.remaining === 0 ? "text-destructive" : daringQuota.remaining <= 1 ? "text-yellow-500" : "text-green-500"}`} />
+                <Wifi className={`h-3 w-3 ${daringQuota.remaining === 0 ? "text-destructive" : daringQuota.remaining <= 1 ? "text-yellow-500" : "text-green-500"}`} aria-hidden="true" />
                 <span className={
                   daringQuota.remaining === 0 ? "text-destructive" :
                   daringQuota.remaining <= 1 ? "text-yellow-500" :

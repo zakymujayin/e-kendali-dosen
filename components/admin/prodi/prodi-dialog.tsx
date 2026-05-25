@@ -76,9 +76,9 @@ export function ProdiDialog({ open, onOpenChange, prodi, faculties, onSuccess }:
             <Input id="code" value={code} onChange={(e) => setCode(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label>Fakultas</Label>
+            <Label htmlFor="facultyId">Fakultas</Label>
             <Select value={facultyId} onValueChange={setFacultyId} required>
-              <SelectTrigger><SelectValue placeholder="Pilih fakultas" /></SelectTrigger>
+              <SelectTrigger id="facultyId"><SelectValue placeholder="Pilih fakultas" /></SelectTrigger>
               <SelectContent>
                 {faculties.map((f) => (
                   <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>

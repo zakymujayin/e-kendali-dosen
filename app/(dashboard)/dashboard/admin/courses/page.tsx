@@ -9,12 +9,12 @@ export default async function CoursesPage() {
 
   const [prodiList, semesters] = await Promise.all([
     prisma.prodi.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.semester.findMany({ select: { id: true, name: true, year: true, term: true }, orderBy: { year: "desc", term: "asc" } }),
+    prisma.semester.findMany({ select: { id: true, name: true, year: true, term: true }, orderBy: [{ year: "desc" }, { term: "asc" }] }),
   ])
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Mata Kuliah</h1>
+    <div className="space-y-6 animate-fade-in-up" id="main-content">
+      <h1 className="text-2xl font-bold tracking-tight">Mata Kuliah</h1>
       <CourseTable prodiList={prodiList} semesters={semesters} />
     </div>
   )

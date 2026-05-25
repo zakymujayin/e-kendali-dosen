@@ -50,7 +50,7 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Laporan BKD</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Laporan e-Kendali Dosen</h1>
       </div>
 
       <div className="flex flex-wrap items-end gap-4">
@@ -65,42 +65,42 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={fetchData} disabled={loading || !semesterId}>
-          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+        <Button onClick={fetchData} disabled={loading || !semesterId} aria-label="Tampilkan data">
+          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" /> : null}
           Tampilkan
         </Button>
         {data && (
           <>
-            <Button variant="outline" asChild>
-              <a href={exportUrl("excel")}><Download className="h-4 w-4 mr-2" />Excel</a>
+            <Button variant="outline" asChild aria-label="Export Excel">
+              <a href={exportUrl("excel")}><Download className="h-4 w-4 mr-2" aria-hidden="true" />Excel</a>
             </Button>
-            <Button variant="outline" asChild>
-              <a href={exportUrl("pdf")}><FileText className="h-4 w-4 mr-2" />PDF</a>
+            <Button variant="outline" asChild aria-label="Export PDF">
+              <a href={exportUrl("pdf")}><FileText className="h-4 w-4 mr-2" aria-hidden="true" />PDF</a>
             </Button>
           </>
         )}
       </div>
 
-      {loading && <p className="text-muted-foreground">Memuat...</p>}
+      {loading && <p className="text-muted-foreground" aria-live="polite">Memuat...</p>}
 
       {data && dosen && (
         <>
           <div className="grid grid-cols-4 gap-4">
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Total SKS</p>
-              <p className="text-2xl font-bold">{dosen.totalSks}</p>
+              <p className="text-3xl font-bold">{dosen.totalSks}</p>
             </CardContent></Card>
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Progress</p>
-              <p className="text-2xl font-bold">{dosen.totalPublished}/{dosen.totalTarget}</p>
+              <p className="text-3xl font-bold">{dosen.totalPublished}/{dosen.totalTarget}</p>
             </CardContent></Card>
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Daring / Luring</p>
-              <p className="text-2xl font-bold">{dosen.daringCount} / {dosen.luringCount}</p>
+              <p className="text-3xl font-bold">{dosen.daringCount} / {dosen.luringCount}</p>
             </CardContent></Card>
-            <Card><CardContent className="pt-6">
+            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Rata-rata Hadir</p>
-              <p className="text-2xl font-bold">{dosen.avgAttendance}%</p>
+              <p className="text-3xl font-bold">{dosen.avgAttendance}%</p>
             </CardContent></Card>
           </div>
 
@@ -129,7 +129,7 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
         </>
       )}
 
-      {data && !dosen && <p className="text-muted-foreground">Belum ada data untuk semester ini.</p>}
+      {data && !dosen && <p className="text-muted-foreground" role="alert">Belum ada data untuk semester ini.</p>}
     </div>
   )
 }

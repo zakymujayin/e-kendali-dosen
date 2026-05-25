@@ -95,7 +95,7 @@ export function CourseTable({ prodiList, semesters }: Props) {
           </SelectContent>
         </Select>
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder="Cari kode atau nama MK..."
             value={search}
@@ -105,14 +105,14 @@ export function CourseTable({ prodiList, semesters }: Props) {
         </div>
         <div className="flex-1" />
         <Button variant="outline" onClick={() => setImportOpen(true)}>
-          <Upload className="h-4 w-4 mr-2" /> Import
+          <Upload className="h-4 w-4 mr-2" aria-hidden="true" /> Import
         </Button>
         <Button onClick={() => { setEditCourse(null); setDialogOpen(true) }}>
-          <Plus className="h-4 w-4 mr-2" /> Tambah MK
+          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah MK
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -142,11 +142,11 @@ export function CourseTable({ prodiList, semesters }: Props) {
                 <TableCell><Badge variant="secondary">{course._count.teachingLoads}</Badge></TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditCourse(course); setDialogOpen(true) }}>
-                      <Pencil className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => { setEditCourse(course); setDialogOpen(true) }}>
+                      <Pencil className="h-4 w-4" aria-hidden="true" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(course)}>
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label={`Hapus ${course.name}`} onClick={() => handleDelete(course)}>
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                 </TableCell>

@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs"
 
 const userSelect = {
   id: true,
+  username: true,
   name: true,
   email: true,
   role: true,

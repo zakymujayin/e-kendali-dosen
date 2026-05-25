@@ -154,7 +154,7 @@ export async function generateBkdExcel(data: BkdReportData): Promise<Buffer> {
     }))
   )
 
-  return generateExcel(rows, "Laporan BKD")
+  return generateExcel(rows, "Laporan e-Kendali Dosen")
 }
 
 export async function generateBkdPdf(data: BkdReportData): Promise<Buffer> {
@@ -205,7 +205,7 @@ export async function generateBkdPdf(data: BkdReportData): Promise<Buffer> {
     pageMargins: [40, 40, 40, 40],
     defaultStyle: { font: "Times", fontSize: 9 },
     content: [
-      { text: "LAPORAN BEBAN KINERJA DOSEN (BKD)", style: "title", margin: [0, 0, 0, 4] },
+      { text: "LAPORAN E-KENDALI DOSEN", style: "title", margin: [0, 0, 0, 4] },
       { text: `Semester: ${data.semester?.name || "-"} ${data.semester?.year || ""}`, style: "subtitle", margin: [0, 0, 0, 2] },
       { text: `Tanggal: ${data.reportDate}`, style: "subtitle", margin: [0, 0, 0, 12] },
       {

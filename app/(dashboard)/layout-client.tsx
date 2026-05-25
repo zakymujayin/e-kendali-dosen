@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import {
   LayoutDashboard,
   BookOpen,
@@ -22,6 +22,7 @@ import {
   BarChart3,
   Download,
   CheckCheck,
+  Building2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -49,6 +50,7 @@ interface NotificationItem {
 const roleMenus: Record<string, { label: string; href: string; icon: React.ElementType }[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
+    { label: "Fakultas", href: "/dashboard/admin/fakultas", icon: Building2 },
     { label: "Prodi", href: "/dashboard/admin/prodi", icon: GraduationCap },
     { label: "User", href: "/dashboard/admin/users", icon: Users },
     { label: "Semester", href: "/dashboard/admin/semester", icon: Calendar },
@@ -60,7 +62,6 @@ const roleMenus: Record<string, { label: string; href: string; icon: React.Eleme
   DOSEN: [
     { label: "Dashboard", href: "/dashboard/dosen", icon: LayoutDashboard },
     { label: "MK Saya", href: "/dashboard/dosen/courses", icon: BookOpen },
-    { label: "BAP", href: "/dashboard/dosen/bap", icon: FileText },
     { label: "Laporan", href: "/dashboard/dosen/reports", icon: Download },
   ],
   GKM: [
@@ -76,13 +77,15 @@ const roleMenus: Record<string, { label: string; href: string; icon: React.Eleme
 }
 
 export function DashboardLayoutClient({
-  user,
+  user: initialUser,
   children,
 }: {
   user: UserData
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const user = session?.user ?? initialUser
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
@@ -144,22 +147,25 @@ export function DashboardLayoutClient({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-muted/30">
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 transform bg-white border-r transition-transform lg:relative lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        aria-label="Navigasi utama"
       >
         <div className="flex h-16 items-center justify-between px-6 border-b">
-          <Link href="/dashboard" className="font-bold text-lg">
-            BKD
+          <Link href="/dashboard" className="font-bold text-lg tracking-tight flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-primary" aria-hidden="true" />
+            e-Kendali Dosen
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden"
+            className="lg:hidden rounded-md p-1 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Tutup menu navigasi"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -173,13 +179,13 @@ export function DashboardLayoutClient({
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-primary text-primary-foreground border-l-2 border-l-primary-foreground/50"
+                    : "text-gray-600 hover:bg-accent hover:text-accent-foreground"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 {item.label}
               </Link>
             )
@@ -190,9 +196,9 @@ export function DashboardLayoutClient({
           <Link
             href="/dashboard/profile"
             onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <User className="h-4 w-4" />
+            <User className="h-4 w-4 shrink-0" aria-hidden="true" />
             Profil
           </Link>
         </div>
@@ -202,16 +208,18 @@ export function DashboardLayoutClient({
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-white px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur-sm px-6">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden"
+            className="lg:hidden rounded-md p-1 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Buka menu navigasi"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5" aria-hidden="true" />
           </button>
 
           <div className="flex-1" />
@@ -219,37 +227,42 @@ export function DashboardLayoutClient({
           <div className="relative">
             <button
               onClick={() => setNotifOpen(!notifOpen)}
-              className="relative p-2 rounded-lg hover:bg-gray-100"
+              className="relative p-2 rounded-lg hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Notifikasi"
+              aria-expanded={notifOpen}
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5" aria-hidden="true" />
               {unreadCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </Badge>
+                <>
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Badge>
+                  <span className="sr-only">{unreadCount} notifikasi belum dibaca</span>
+                </>
               )}
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg shadow-black/5 z-50">
                 <div className="p-3 border-b flex items-center justify-between">
                   <p className="font-semibold text-sm">Notifikasi</p>
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-xs text-primary hover:underline flex items-center gap-1"
+                      className="text-xs text-primary hover:underline flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
                     >
-                      <CheckCheck className="h-3 w-3" />
+                      <CheckCheck className="h-3 w-3" aria-hidden="true" />
                       Baca semua
                     </button>
                   )}
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {notifLoading ? (
-                    <div className="p-6 text-center text-sm text-gray-500">
+                    <div className="p-6 text-center text-sm text-muted-foreground" aria-live="polite">
                       Memuat...
                     </div>
                   ) : notifications.length === 0 ? (
-                    <div className="p-6 text-center text-sm text-gray-500">
+                    <div className="p-6 text-center text-sm text-muted-foreground">
                       Tidak ada notifikasi
                     </div>
                   ) : (
@@ -258,17 +271,17 @@ export function DashboardLayoutClient({
                         key={n.id}
                         onClick={() => markAsRead(n.id)}
                         className={cn(
-                          "w-full text-left p-3 border-b last:border-0 hover:bg-gray-50 transition-colors",
-                          !n.isRead && "bg-blue-50/50"
+                          "w-full text-left p-3 border-b last:border-0 hover:bg-muted/50 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                          !n.isRead && "bg-primary/5"
                         )}
                       >
                         <div className="flex items-start gap-2">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium">{n.title}</p>
-                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                               {n.message}
                             </p>
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="text-xs text-muted-foreground/60 mt-1">
                               {new Date(n.createdAt).toLocaleDateString("id-ID", {
                                 day: "numeric",
                                 month: "short",
@@ -278,7 +291,7 @@ export function DashboardLayoutClient({
                             </p>
                           </div>
                           {!n.isRead && (
-                            <span className="h-2 w-2 rounded-full bg-blue-500 mt-1 shrink-0" />
+                            <span className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1" aria-label="Belum dibaca" />
                           )}
                         </div>
                       </button>
@@ -298,13 +311,16 @@ export function DashboardLayoutClient({
               variant="ghost"
               size="icon"
               onClick={() => signOut({ callbackUrl: "/login" })}
+              aria-label="Keluar"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
         </header>
 
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-6 animate-fade-in-up" id="main-content">
+          {children}
+        </main>
       </div>
     </div>
   )

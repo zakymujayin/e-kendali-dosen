@@ -26,9 +26,9 @@ export default async function ProdiPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up" id="main-content">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Data Prodi</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Data Prodi</h1>
       </div>
       <ProdiTable prodi={prodi} faculties={faculties} users={users} />
     </div>

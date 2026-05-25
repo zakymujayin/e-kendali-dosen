@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,8 +23,10 @@ interface Props {
 
 export function UserForm({ mode, userId, faculties, prodiList }: Props) {
   const router = useRouter()
+  const { data: session, update } = useSession()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(mode === "edit")
+  const [username, setUsername] = useState("")
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -43,6 +46,7 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
         .then((json) => {
           if (json.success) {
             const u = json.data
+            setUsername(u.username)
             setName(u.name)
             setEmail(u.email)
             setRole(u.role)
@@ -66,7 +70,7 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
 
     const url = mode === "create" ? "/api/users" : `/api/users/${userId}`
     const method = mode === "create" ? "POST" : "PUT"
-    const body: Record<string, unknown> = { name, email, role, nidn, nip, phone, prodiId }
+    const body: Record<string, unknown> = { username, name, email, role, nidn, nip, phone, prodiId: prodiId || null }
     if (password) body.password = password
 
     const res = await fetch(url, {
@@ -77,6 +81,9 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
     const data = await res.json()
 
     if (data.success) {
+      if (session?.user?.id === userId) {
+        await update({ name })
+      }
       toast.success(data.message)
       router.push("/dashboard/admin/users")
       router.refresh()
@@ -94,7 +101,7 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </Button>
         <h1 className="text-2xl font-bold">{mode === "create" ? "Tambah User" : "Edit User"}</h1>
       </div>
@@ -113,6 +120,10 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="username">Username *</Label>
+                <Input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="password">
                   Password {mode === "edit" && <span className="text-muted-foreground text-xs">(kosongkan jika tidak diubah)</span>}
                 </Label>
@@ -123,9 +134,9 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Role *</Label>
+                <Label htmlFor="role">Role *</Label>
                 <Select value={role} onValueChange={setRole} required>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="role"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(ROLE_LABELS).map(([key, label]) => (
                       <SelectItem key={key} value={key}>{label}</SelectItem>
@@ -146,9 +157,9 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
                 <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Fakultas</Label>
+                <Label htmlFor="facultyId">Fakultas</Label>
                 <Select value={facultyId} onValueChange={(v) => { setFacultyId(v); setProdiId("") }}>
-                  <SelectTrigger><SelectValue placeholder="Pilih fakultas" /></SelectTrigger>
+                  <SelectTrigger id="facultyId"><SelectValue placeholder="Pilih fakultas" /></SelectTrigger>
                   <SelectContent>
                     {faculties.map((f) => (
                       <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
@@ -157,9 +168,9 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Prodi</Label>
+                <Label htmlFor="prodiId">Prodi</Label>
                 <Select value={prodiId} onValueChange={setProdiId} disabled={!facultyId}>
-                  <SelectTrigger><SelectValue placeholder="Pilih prodi" /></SelectTrigger>
+                  <SelectTrigger id="prodiId"><SelectValue placeholder="Pilih prodi" /></SelectTrigger>
                   <SelectContent>
                     {filteredProdi.map((p) => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -172,7 +183,7 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
             <div className="flex gap-2 justify-end pt-4">
               <Button type="button" variant="outline" onClick={() => router.back()}>Batal</Button>
               <Button type="submit" disabled={loading}>
-                <Save className="h-4 w-4 mr-2" /> {loading ? "Menyimpan..." : "Simpan"}
+                <Save className="h-4 w-4 mr-2" aria-hidden="true" /> {loading ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>
           </form>

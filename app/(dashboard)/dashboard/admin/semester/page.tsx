@@ -7,8 +7,8 @@ export default async function SemesterPage() {
   if (!session?.user || session.user.role !== "ADMIN") redirect("/dashboard")
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Data Semester</h1>
+    <div className="space-y-6 animate-fade-in-up" id="main-content">
+      <h1 className="text-2xl font-bold tracking-tight">Data Semester</h1>
       <SemesterTable />
     </div>
   )
