@@ -47,7 +47,7 @@ interface NotificationItem {
   createdAt: string
 }
 
-const roleMenus: Record<string, { label: string; href: string; icon: React.ElementType }[]> = {
+const roleMenus: Record<string, { label: string; sublabel?: string; href: string; icon: React.ElementType }[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
     { label: "Fakultas", href: "/dashboard/admin/fakultas", icon: Building2 },
@@ -60,9 +60,9 @@ const roleMenus: Record<string, { label: string; href: string; icon: React.Eleme
     { label: "Laporan", href: "/dashboard/admin/reports", icon: FileText },
   ],
   DOSEN: [
-    { label: "Dashboard", href: "/dashboard/dosen", icon: LayoutDashboard },
-    { label: "MK Saya", href: "/dashboard/dosen/courses", icon: BookOpen },
-    { label: "Laporan", href: "/dashboard/dosen/reports", icon: Download },
+    { label: "Dashboard", sublabel: "Beranda", href: "/dashboard/dosen", icon: LayoutDashboard },
+    { label: "MK Saya", sublabel: "Mata Kuliah", href: "/dashboard/dosen/courses", icon: BookOpen },
+    { label: "Laporan", sublabel: "BKD", href: "/dashboard/dosen/reports", icon: Download },
   ],
   GKM: [
     { label: "Dashboard", href: "/dashboard/gkm", icon: LayoutDashboard },
@@ -186,7 +186,12 @@ export function DashboardLayoutClient({
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                {item.label}
+                <div>
+                  <span className="text-sm">{item.label}</span>
+                  {item.sublabel && (
+                    <span className="text-xs text-muted-foreground block">{item.sublabel}</span>
+                  )}
+                </div>
               </Link>
             )
           })}
