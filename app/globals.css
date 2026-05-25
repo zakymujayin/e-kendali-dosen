@@ -96,3 +96,18 @@
 [data-state="closed"] {
   animation: exit 0.2s ease-in;
 }
+
+@media print {
+  body > div > aside,
+  body > div > div > header,
+  .no-print {
+    display: none !important;
+  }
+  main#main-content {
+    margin-left: 0 !important;
+    padding: 1cm !important;
+  }
+  @page {
+    margin: 1.5cm;
+  }
+}

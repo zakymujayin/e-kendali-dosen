@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+
 import { Download, FileText, Loader2 } from "lucide-react"
 
 interface Semester { id: string; name: string; year: string; term: string; isActive: boolean }
@@ -46,6 +46,11 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
   }
 
   const dosen = data?.dosen?.[0]
+
+  useEffect(() => {
+    if (semesterId) fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -118,7 +123,21 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
                     <TableRow key={i}>
                       <TableCell><span className="font-medium">{c.code}</span><br /><span className="text-xs text-muted-foreground">{c.name}</span></TableCell>
                       <TableCell>{c.sks}</TableCell><TableCell>{c.published}</TableCell><TableCell>{c.target}</TableCell>
-                      <TableCell><Badge variant={c.published >= c.target ? "default" : "secondary"}>{c.progressPercent}%</Badge></TableCell>
+                       <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 bg-secondary rounded-full h-2.5">
+                              <div
+                                className={`h-2.5 rounded-full ${
+                                  c.progressPercent >= 80 ? "bg-green-500" :
+                                  c.progressPercent >= 50 ? "bg-yellow-500" :
+                                  "bg-red-500"
+                                }`}
+                                style={{ width: `${Math.min(c.progressPercent, 100)}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium">{c.progressPercent}%</span>
+                          </div>
+                        </TableCell>
                       <TableCell>{c.daring}</TableCell><TableCell>{c.luring}</TableCell><TableCell>{c.avgAttendance}%</TableCell>
                     </TableRow>
                   ))}

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation"
 import { SessionTable } from "@/components/dosen/session-table"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Printer } from "lucide-react"
 
 export default async function CourseDetailPage({
   params,
@@ -40,11 +42,17 @@ export default async function CourseDetailPage({
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{teachingLoad.course.name}</h1>
-        <p className="text-muted-foreground">
-          {teachingLoad.course.code} · {teachingLoad.course.sks} SKS · {teachingLoad.semester.name} {teachingLoad.semester.year}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{teachingLoad.course.name}</h1>
+          <p className="text-muted-foreground">
+            {teachingLoad.course.code} · {teachingLoad.course.sks} SKS · {teachingLoad.semester.name} {teachingLoad.semester.year}
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => window.print()} className="no-print" aria-label="Cetak halaman">
+          <Printer className="h-4 w-4 mr-2" aria-hidden="true" />
+          Cetak
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
