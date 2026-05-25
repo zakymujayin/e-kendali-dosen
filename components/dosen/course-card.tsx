@@ -44,8 +44,8 @@ export function CourseCard({
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-base">{course.name}</CardTitle>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <CardTitle className="text-lg">{course.name}</CardTitle>
+              <p className="text-base text-muted-foreground mt-0.5">
                 {course.code} · {course.sks} SKS
               </p>
             </div>
@@ -63,7 +63,7 @@ export function CourseCard({
               />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" aria-hidden="true" />
                 {publishedSessions} published · {draftSessions} draft
@@ -76,7 +76,7 @@ export function CourseCard({
             </div>
 
             {daringQuota && (
-              <div className="flex items-center gap-1.5 text-xs">
+              <div className="flex items-center gap-1.5 text-sm">
                 <Wifi className={`h-3 w-3 ${daringQuota.remaining === 0 ? "text-destructive" : daringQuota.remaining <= 1 ? "text-yellow-500" : "text-green-500"}`} aria-hidden="true" />
                 <span className={
                   daringQuota.remaining === 0 ? "text-destructive" :

@@ -56,12 +56,12 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
         {publishedCount > 0 && (
           <Button variant="outline" asChild>
             <a href={`/api/reports/bap-batch?teachingLoadId=${teachingLoadId}`} target="_blank" rel="noopener noreferrer" aria-label="Download Semua BAP">
-              <FileText className="h-4 w-4 mr-2" aria-hidden="true" /> Download Semua BAP
+              <FileText className="h-5 w-5 mr-2" aria-hidden="true" /> Download Semua BAP
             </a>
           </Button>
         )}
         <Button onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/new`)} aria-label="Tambah Sesi">
-          <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Tambah Sesi
+          <Plus className="h-5 w-5 mr-2" aria-hidden="true" /> Tambah Sesi
         </Button>
       </div>
 
@@ -86,7 +86,7 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                 <TableCell>
                   {format(new Date(s.date), "dd MMM yyyy", { locale: id })}
                 </TableCell>
-                <TableCell className="text-xs">
+                <TableCell className="text-base">
                   {s.startTime} - {s.endTime}
                 </TableCell>
                 <TableCell className="max-w-xs truncate">{s.topic}</TableCell>
@@ -109,7 +109,7 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                           onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/${s.id}/edit`)}
                           aria-label="Edit"
                         >
-                          <Pencil className="h-4 w-4" aria-hidden="true" />
+                          <Pencil className="h-5 w-5" aria-hidden="true" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -117,7 +117,7 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                           onClick={() => handleDelete(s.id, s.meetingNumber)}
                           aria-label="Hapus"
                         >
-                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                          <Trash2 className="h-5 w-5" aria-hidden="true" />
                         </Button>
                       </>
                     )}
@@ -128,7 +128,7 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                         onClick={() => router.push(`/dashboard/dosen/courses/${courseId}/sessions/${s.id}`)}
                         aria-label="Download BAP"
                       >
-                        <FileDown className="h-4 w-4" aria-hidden="true" />
+                        <FileDown className="h-5 w-5" aria-hidden="true" />
                       </Button>
                     )}
                   </div>
