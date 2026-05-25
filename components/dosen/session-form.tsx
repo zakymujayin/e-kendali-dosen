@@ -311,7 +311,7 @@ export function SessionForm({
               <p className="text-sm text-muted-foreground">
                 Sesi pertemuan ke-{meetingNumber} dari {courseTotalMeeting} pertemuan
               </p>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="date" className="text-base">Tanggal</Label>
                   <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="text-base" />
@@ -475,7 +475,7 @@ export function SessionForm({
           {step === 3 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Siapa saja yang hadir?</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="present" className="text-base">Mahasiswa Hadir</Label>
                   <Input id="present" type="number" min={0} value={studentPresent} onChange={(e) => setStudentPresent(e.target.value)} className="text-base" />

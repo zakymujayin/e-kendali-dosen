@@ -23,7 +23,7 @@ export function HelpTip({ text }: Props) {
       </button>
       {open && (
         <span
-          className="absolute left-6 top-0 z-50 w-56 p-2 text-xs bg-popover text-popover-foreground border rounded-lg shadow-lg"
+          className="absolute left-6 top-0 z-50 w-56 max-w-[calc(100vw-2rem)] p-2 text-xs bg-popover text-popover-foreground border rounded-lg shadow-lg"
           role="tooltip"
         >
           {text}

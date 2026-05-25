@@ -71,9 +71,9 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
             <TableRow>
               <TableHead className="w-16">TM</TableHead>
               <TableHead>Tanggal</TableHead>
-              <TableHead>Jam</TableHead>
+              <TableHead className="hidden md:table-cell">Jam</TableHead>
               <TableHead>Topik</TableHead>
-              <TableHead>Metode</TableHead>
+              <TableHead className="hidden md:table-cell">Metode</TableHead>
               <TableHead>Hadir</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -86,11 +86,11 @@ export function SessionTable({ courseId, teachingLoadId, sessions }: Props) {
                 <TableCell>
                   {format(new Date(s.date), "dd MMM yyyy", { locale: id })}
                 </TableCell>
-                <TableCell className="text-base">
+                <TableCell className="hidden md:table-cell text-base">
                   {s.startTime} - {s.endTime}
                 </TableCell>
-                <TableCell className="max-w-xs truncate">{s.topic}</TableCell>
-                <TableCell>
+                <TableCell className="max-w-[150px] sm:max-w-xs truncate">{s.topic}</TableCell>
+                <TableCell className="hidden md:table-cell">
                   <Badge variant="outline">{METHOD_LABELS[s.method] || s.method}</Badge>
                 </TableCell>
                 <TableCell>{s.studentPresent}/{s.studentTotal}</TableCell>

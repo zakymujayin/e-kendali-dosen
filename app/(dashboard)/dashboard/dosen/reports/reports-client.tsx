@@ -63,7 +63,7 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
         <div className="space-y-1">
           <Label className="text-xs">Semester</Label>
           <Select value={semesterId} onValueChange={setSemesterId}>
-            <SelectTrigger className="w-[220px]"><SelectValue placeholder="Pilih Semester" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[220px]"><SelectValue placeholder="Pilih Semester" /></SelectTrigger>
             <SelectContent>
               {semesters.map((s) => (
                 <SelectItem key={s.id} value={s.id}>{s.name} {s.year} {s.isActive ? "(Aktif)" : ""}</SelectItem>
@@ -91,7 +91,7 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
 
       {data && dosen && (
         <>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="hover:shadow-md transition-shadow border-l-4 border-teal-500">
               <CardHeader className="pb-2">
                 <CardTitle className="text-3xl font-bold">{dosen.totalSks}</CardTitle>
@@ -124,14 +124,14 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>MK</TableHead><TableHead>SKS</TableHead><TableHead>Published</TableHead><TableHead>Target</TableHead><TableHead>Progress</TableHead><TableHead>Daring</TableHead><TableHead>Luring</TableHead><TableHead>Hadir%</TableHead>
+                    <TableHead>MK</TableHead><TableHead className="hidden md:table-cell">SKS</TableHead><TableHead>Published</TableHead><TableHead>Target</TableHead><TableHead>Progress</TableHead><TableHead className="hidden md:table-cell">Daring</TableHead><TableHead className="hidden md:table-cell">Luring</TableHead><TableHead>Hadir%</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {dosen.courses.map((c, i) => (
                     <TableRow key={i}>
                       <TableCell><span className="font-medium">{c.code}</span><br /><span className="text-xs text-muted-foreground">{c.name}</span></TableCell>
-                      <TableCell>{c.sks}</TableCell><TableCell>{c.published}</TableCell><TableCell>{c.target}</TableCell>
+                      <TableCell className="hidden md:table-cell">{c.sks}</TableCell><TableCell>{c.published}</TableCell><TableCell>{c.target}</TableCell>
                        <TableCell>
                           <div className="flex items-center gap-2">
                             <Progress
@@ -145,7 +145,7 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
                             <span className="text-sm font-medium">{c.progressPercent}%</span>
                           </div>
                         </TableCell>
-                      <TableCell>{c.daring}</TableCell><TableCell>{c.luring}</TableCell><TableCell>{c.avgAttendance}%</TableCell>
+                      <TableCell className="hidden md:table-cell">{c.daring}</TableCell><TableCell className="hidden md:table-cell">{c.luring}</TableCell><TableCell>{c.avgAttendance}%</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

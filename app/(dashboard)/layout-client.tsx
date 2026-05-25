@@ -256,7 +256,7 @@ export function DashboardLayoutClient({
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg shadow-black/5 z-50">
+              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white border rounded-lg shadow-lg shadow-black/5 z-50">
                 <div className="p-3 border-b flex items-center justify-between">
                   <p className="font-semibold text-sm">Notifikasi</p>
                   {unreadCount > 0 && (

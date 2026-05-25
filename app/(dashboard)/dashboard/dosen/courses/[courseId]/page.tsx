@@ -50,7 +50,7 @@ export default async function CourseDetailPage({
         <PrintButton />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="hover:shadow-md transition-shadow border-l-4 border-indigo-500">
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl font-bold">{publishedCount}/{teachingLoad.course.totalMeeting}</CardTitle>

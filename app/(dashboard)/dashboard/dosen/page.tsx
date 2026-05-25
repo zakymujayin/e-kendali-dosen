@@ -46,7 +46,7 @@ export default async function DosenDashboardPage() {
       {firstUnfinishedCourseId && (
         <div className="flex flex-col items-start gap-2">
           <Button asChild size="default">
-            <Link href={`/dashboard/dosen/courses/${firstUnfinishedCourseId}/sessions/new`}>
+            <Link href="/dashboard/dosen/courses">
               <Plus className="h-5 w-5 mr-2" /> Buat Sesi Hari Ini
             </Link>
           </Button>
