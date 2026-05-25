@@ -44,6 +44,12 @@ interface SessionFormProps {
   } | null
 }
 
+const STEPS = [
+  { num: 1, label: "Kapan?" },
+  { num: 2, label: "Apa & Bagaimana?" },
+  { num: 3, label: "Siapa? + Selesai" },
+] as const
+
 export function SessionForm({
   teachingLoadId,
   courseId,
@@ -54,13 +60,14 @@ export function SessionForm({
   const router = useRouter()
   const isEdit = !!existingSession
 
+  const [step, setStep] = useState(1)
   const [meetingNumber, setMeetingNumber] = useState(existingSession?.meetingNumber || 0)
   const [date, setDate] = useState(existingSession?.date?.split("T")[0] || new Date().toISOString().split("T")[0])
   const [startTime, setStartTime] = useState(existingSession?.startTime || "")
   const [endTime, setEndTime] = useState(existingSession?.endTime || "")
   const [topic, setTopic] = useState(existingSession?.topic || "")
   const [method, setMethod] = useState(existingSession?.method || "")
-  const [sessionType, setSessionType] = useState(existingSession?.sessionType || "NORMAL")
+  const [sessionType] = useState(existingSession?.sessionType || "NORMAL")
   const [studentPresent, setStudentPresent] = useState(existingSession?.studentPresent?.toString() || "0")
   const [studentAbsent, setStudentAbsent] = useState(existingSession?.studentAbsent?.toString() || "0")
   const [platformUrl, setPlatformUrl] = useState(existingSession?.platformUrl || "")
@@ -265,9 +272,27 @@ export function SessionForm({
         <CardHeader>
           <CardTitle className="text-xl">{isEdit ? "Edit Sesi" : "Tambah Sesi"} &mdash; {courseName}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent>
+          <div className="flex items-center justify-center gap-2 mb-6">
+            {STEPS.map((s, i) => (
+              <div key={s.num} className="flex items-center gap-2">
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                  step === s.num ? "bg-primary text-primary-foreground" :
+                  step > s.num ? "bg-green-500 text-white" :
+                  "bg-muted text-muted-foreground"
+                }`}>
+                  {step > s.num ? "✓" : s.num}
+                </div>
+                <span className={`text-sm ${step === s.num ? "font-medium" : "text-muted-foreground"}`}>
+                  {s.label}
+                </span>
+                {i < STEPS.length - 1 && <div className="w-6 h-px bg-border" />}
+              </div>
+            ))}
+          </div>
+
           {daringQuota && (
-            <div className={`flex items-center gap-2 p-3 rounded-lg border ${
+            <div className={`mb-6 flex items-center gap-2 p-3 rounded-lg border ${
               daringQuota.remaining === 0 ? "bg-red-50 border-red-200" :
               daringQuota.remaining <= 1 ? "bg-yellow-50 border-yellow-200" :
               "bg-blue-50 border-blue-200"
@@ -283,235 +308,212 @@ export function SessionForm({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="meetingNumber" className="text-base">Sesi pertemuan ke-</Label>
-              <Input
-                id="meetingNumber"
-                type="number"
-                min={1}
-                max={courseTotalMeeting}
-                value={meetingNumber}
-                onChange={(e) => setMeetingNumber(parseInt(e.target.value) || 0)}
-                required
-                className="text-base"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sessionType" className="text-base">Jenis sesi</Label>
-              <Select value={sessionType} onValueChange={setSessionType}>
-                <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NORMAL">Normal</SelectItem>
-                  <SelectItem value="PENGGANTI">Pengganti</SelectItem>
-                  <SelectItem value="TAMBAHAN">Tambahan</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date" className="text-base">Tanggal</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="text-base" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="startTime" className="text-base">Jam Mulai</Label>
-              <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="text-base" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="endTime" className="text-base">Jam Selesai</Label>
-              <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="text-base" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="topic" className="text-base">Topik</Label>
-            <Input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} required placeholder="Materi perkuliahan" className="text-base" />
-          </div>
-
-          <fieldset className="space-y-2">
-            <legend className="flex items-center gap-1 text-base font-medium mb-2">
-              Metode mengajar
-              <HelpTip text="Pilih cara mengajar: tatap muka langsung di kelas (luring) atau online via Zoom/Google Meet (daring)" />
-            </legend>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground font-medium">Luring</p>
-              <div className="flex flex-wrap gap-2">
-                {LURING.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMethod(m)}
-                    aria-pressed={method === m}
-                    className={`px-4 py-3 rounded-lg text-base border transition-colors ${
-                      method === m
-                        ? "bg-green-100 border-green-500 text-green-800"
-                        : "bg-background border-input hover:bg-muted"
-                    }`}
-                  >
-                    {METHOD_LABELS[m] || m}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2 mt-2">
-              <p className="text-sm text-muted-foreground font-medium">Daring</p>
-              <div className="flex flex-wrap gap-2">
-                {DARING.map((m) => {
-                  const disabled = m === method ? false : !!daringQuota && !daringQuota.isAvailable
-                  return (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => !disabled && setMethod(m)}
-                      disabled={disabled && m !== method}
-                      aria-pressed={method === m}
-                      className={`px-4 py-3 rounded-lg text-base border transition-colors ${
-                        method === m
-                          ? "bg-purple-100 border-purple-500 text-purple-800"
-                          : disabled
-                          ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
-                          : "bg-background border-input hover:bg-muted"
-                      }`}
-                    >
-                      {METHOD_LABELS[m] || m}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          </fieldset>
-
-          {!isDaring && method && (
-            <div className="space-y-3 p-4 rounded-lg border bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-green-600" aria-hidden="true" />
-                  <span className="text-base font-medium">Validasi GPS</span>
+          {step === 1 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Kapan perkuliahan dilaksanakan?</h3>
+              <p className="text-sm text-muted-foreground">
+                Sesi pertemuan ke-{meetingNumber} dari {courseTotalMeeting} pertemuan
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date" className="text-base">Tanggal</Label>
+                  <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="text-base" />
                 </div>
-                <Button type="button" variant="outline" size="sm" onClick={handleDetectGps} disabled={gpsStatus === "loading"}>
-                  <Crosshair className="h-4 w-4 mr-2" aria-hidden="true" />
-                  {gpsStatus === "loading" ? "Mendeteksi..." : "Deteksi Lokasi Saya"}
+                <div className="space-y-2">
+                  <Label htmlFor="startTime" className="text-base">Jam Mulai</Label>
+                  <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="text-base" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endTime" className="text-base">Jam Selesai</Label>
+                  <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="text-base" />
+                </div>
+              </div>
+              <div className="flex justify-end pt-4">
+                <Button type="button" onClick={() => {
+                  if (!date || !startTime || !endTime) { toast.error("Lengkapi tanggal dan jam terlebih dahulu"); return }
+                  setStep(2)
+                }}>
+                  Selanjutnya →
                 </Button>
               </div>
-
-              {latitude && longitude && (
-                <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                  <div>Lat: {latitude}</div>
-                  <div>Lng: {longitude}</div>
-                  {gpsAccuracy && <div>Akurasi: {gpsAccuracy}m</div>}
-                </div>
-              )}
-
-              {gpsStatus === "valid" && gpsDistance !== null && (
-                <div className="flex items-center gap-2 text-base text-green-700 bg-green-50 p-2 rounded" aria-live="polite">
-                  <MapPin className="h-4 w-4" aria-hidden="true" />
-                  <span>Lokasi valid &mdash; jarak {Math.round(gpsDistance)}m dari kampus ✓</span>
-                </div>
-              )}
-              {gpsStatus === "invalid" && gpsDistance !== null && (
-                <div className="flex items-center gap-2 text-base text-red-700 bg-red-50 p-2 rounded" aria-live="polite">
-                  <MapPin className="h-4 w-4" aria-hidden="true" />
-                  <span>Lokasi di luar area kampus &mdash; jarak {Math.round(gpsDistance)}m &gt; 300m ✗</span>
-                </div>
-              )}
-              {gpsStatus === "error" && (
-                <p className="text-sm text-red-500" role="alert">Gagal validasi GPS. Coba lagi atau periksa izin lokasi.</p>
-              )}
             </div>
           )}
 
-          {isDaring && method && (
-            <div className="space-y-3 p-4 rounded-lg border bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-purple-600" aria-hidden="true" />
-                <span className="text-base font-medium">URL Platform</span>
+          {step === 2 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Apa materi dan bagaimana metodenya?</h3>
+              <div className="space-y-2">
+                <Label htmlFor="topic" className="text-base">Topik / Materi</Label>
+                <Input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} required placeholder="Materi perkuliahan" className="text-base" />
               </div>
-              <Input
-                value={platformUrl}
-                onChange={(e) => setPlatformUrl(e.target.value)}
-                onBlur={handleUrlBlur}
-                placeholder="https://zoom.us/j/..."
-                className={`text-base ${urlError ? "border-red-500" : ""}`}
-              />
-              {urlError && <p className="text-sm text-red-500" role="alert">{urlError}</p>}
-              {platformUrl && !urlError && isValidUrl(platformUrl) && (
-                <p className="text-sm text-green-600">URL valid ✓</p>
+              <fieldset className="space-y-2">
+                <legend className="flex items-center gap-1 text-base font-medium">
+                  Metode mengajar
+                  <HelpTip text="Pilih cara mengajar: tatap muka langsung di kelas (luring) atau online via Zoom/Google Meet (daring)" />
+                </legend>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground font-medium">Luring</p>
+                  <div className="flex flex-wrap gap-2">
+                    {LURING.map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setMethod(m)}
+                        aria-pressed={method === m}
+                        className={`px-4 py-3 rounded-lg text-base border transition-colors ${
+                          method === m
+                            ? "bg-green-100 border-green-500 text-green-800"
+                            : "bg-background border-input hover:bg-muted"
+                        }`}
+                      >
+                        {METHOD_LABELS[m] || m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2 mt-2">
+                  <p className="text-sm text-muted-foreground font-medium">Daring</p>
+                  <div className="flex flex-wrap gap-2">
+                    {DARING.map((m) => {
+                      const disabled = m === method ? false : !!daringQuota && !daringQuota.isAvailable
+                      return (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => !disabled && setMethod(m)}
+                          disabled={disabled && m !== method}
+                          aria-pressed={method === m}
+                          className={`px-4 py-3 rounded-lg text-base border transition-colors ${
+                            method === m
+                              ? "bg-purple-100 border-purple-500 text-purple-800"
+                              : disabled
+                              ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-background border-input hover:bg-muted"
+                          }`}
+                        >
+                          {METHOD_LABELS[m] || m}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </fieldset>
+
+              {!isDaring && method && (
+                <div className="space-y-3 p-4 rounded-lg border bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-green-600" aria-hidden="true" />
+                      <span className="text-base font-medium">Validasi GPS</span>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={handleDetectGps} disabled={gpsStatus === "loading"}>
+                      <Crosshair className="h-4 w-4 mr-2" aria-hidden="true" />
+                      {gpsStatus === "loading" ? "Mendeteksi..." : "Deteksi Lokasi Saya"}
+                    </Button>
+                  </div>
+                  {latitude && longitude && (
+                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                      <div>Lat: {latitude}</div>
+                      <div>Lng: {longitude}</div>
+                      {gpsAccuracy && <div>Akurasi: {gpsAccuracy}m</div>}
+                    </div>
+                  )}
+                  {gpsStatus === "valid" && gpsDistance !== null && (
+                    <div className="flex items-center gap-2 text-base text-green-700 bg-green-50 p-2 rounded" aria-live="polite">
+                      <MapPin className="h-4 w-4" aria-hidden="true" />
+                      <span>Lokasi valid &mdash; jarak {Math.round(gpsDistance)}m dari kampus ✓</span>
+                    </div>
+                  )}
+                  {gpsStatus === "invalid" && gpsDistance !== null && (
+                    <div className="flex items-center gap-2 text-base text-red-700 bg-red-50 p-2 rounded" aria-live="polite">
+                      <MapPin className="h-4 w-4" aria-hidden="true" />
+                      <span>Lokasi di luar area kampus &mdash; jarak {Math.round(gpsDistance)}m &gt; 300m ✗</span>
+                    </div>
+                  )}
+                  {gpsStatus === "error" && (
+                    <p className="text-sm text-red-500" role="alert">Gagal validasi GPS. Coba lagi atau periksa izin lokasi.</p>
+                  )}
+                </div>
               )}
-              {daringQuota && (
-                <p className="text-sm text-muted-foreground">
-                  Kuota daring terpakai: {daringQuota.used}/{MAX_DARING}
-                </p>
+
+              {isDaring && method && (
+                <div className="space-y-3 p-4 rounded-lg border bg-gray-50">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-purple-600" aria-hidden="true" />
+                    <span className="text-base font-medium">URL Platform</span>
+                  </div>
+                  <Input
+                    value={platformUrl}
+                    onChange={(e) => setPlatformUrl(e.target.value)}
+                    onBlur={handleUrlBlur}
+                    placeholder="https://zoom.us/j/..."
+                    className={`text-base ${urlError ? "border-red-500" : ""}`}
+                  />
+                  {urlError && <p className="text-sm text-red-500" role="alert">{urlError}</p>}
+                  {platformUrl && !urlError && isValidUrl(platformUrl) && (
+                    <p className="text-sm text-green-600">URL valid ✓</p>
+                  )}
+                  {daringQuota && (
+                    <p className="text-sm text-muted-foreground">
+                      Kuota daring terpakai: {daringQuota.used}/{MAX_DARING}
+                    </p>
+                  )}
+                </div>
               )}
+
+              <div className="flex justify-between pt-4">
+                <Button type="button" variant="outline" onClick={() => setStep(1)}>← Kembali</Button>
+                <Button type="button" onClick={() => {
+                  if (!topic || !method) { toast.error("Lengkapi topik dan metode mengajar"); return }
+                  if (!isDaring && (!latitude || !longitude)) { toast.error("Deteksi GPS wajib untuk sesi luring"); return }
+                  if (isDaring && !platformUrl) { toast.error("URL platform wajib untuk sesi daring"); return }
+                  setStep(3)
+                }}>
+                  Selanjutnya →
+                </Button>
+              </div>
             </div>
           )}
 
-          <fieldset className="space-y-2">
-            <legend className="sr-only">Kehadiran Mahasiswa</legend>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <Label htmlFor="present" className="text-sm">Hadir</Label>
-                <Input
-                  id="present"
-                  type="number"
-                  min={0}
-                  value={studentPresent}
-                  onChange={(e) => setStudentPresent(e.target.value)}
-                  className="text-base"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="absent" className="text-sm">Tidak Hadir</Label>
-                <Input
-                  id="absent"
-                  type="number"
-                  min={0}
-                  value={studentAbsent}
-                  onChange={(e) => setStudentAbsent(e.target.value)}
-                  className="text-base"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-sm">Total</Label>
-                <div className="flex h-10 items-center px-3 rounded-md border bg-muted text-base">
-                  {totalStudents}
+          {step === 3 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Siapa saja yang hadir?</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="present" className="text-base">Mahasiswa Hadir</Label>
+                  <Input id="present" type="number" min={0} value={studentPresent} onChange={(e) => setStudentPresent(e.target.value)} className="text-base" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="absent" className="text-base">Tidak Hadir</Label>
+                  <Input id="absent" type="number" min={0} value={studentAbsent} onChange={(e) => setStudentAbsent(e.target.value)} className="text-base" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-base">Total</Label>
+                  <div className="flex h-10 items-center px-3 rounded-md border bg-muted text-base">{totalStudents}</div>
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes" className="text-base">Catatan (opsional)</Label>
+                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Catatan tambahan..." rows={3} className="text-base" />
+              </div>
+              <label className="flex items-center gap-2 text-base cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={publishAfterSave}
+                  onChange={(e) => setPublishAfterSave(e.target.checked)}
+                  className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                Langsung publish setelah simpan
+              </label>
+              <div className="flex justify-between pt-4 border-t">
+                <Button type="button" variant="outline" onClick={() => setStep(2)}>← Kembali</Button>
+                <Button type="button" onClick={() => handleSubmit(publishAfterSave)} disabled={loading}>
+                  <Save className="h-4 w-4 mr-2" aria-hidden="true" />
+                  {loading ? "Menyimpan..." : "Simpan ✓"}
+                </Button>
+              </div>
             </div>
-          </fieldset>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="text-base">Catatan (opsional)</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Catatan tambahan..."
-              rows={3}
-              className="text-base"
-            />
-          </div>
-
-          <div className="flex items-center gap-4 pt-4 border-t">
-            <label className="flex items-center gap-2 text-base cursor-pointer">
-              <input
-                type="checkbox"
-                checked={publishAfterSave}
-                onChange={(e) => setPublishAfterSave(e.target.checked)}
-                className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
-              />
-              Langsung publish setelah simpan
-            </label>
-            <div className="flex-1" />
-            <Button type="button" variant="outline" onClick={() => router.back()}>
-              Batal
-            </Button>
-            <Button type="button" onClick={() => handleSubmit(publishAfterSave)} disabled={loading}>
-              <Save className="h-4 w-4 mr-2" aria-hidden="true" />
-              {loading ? "Menyimpan..." : "Simpan"}
-            </Button>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
