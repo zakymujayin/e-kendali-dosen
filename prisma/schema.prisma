@@ -82,10 +82,11 @@ model Prodi {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  faculty  Faculty  @relation(fields: [facultyId], references: [id])
-  users    User[]   @relation("ProdiMembers")
-  gkmUsers User[]   @relation("GKMProdi")
-  courses  Course[]
+  faculty       Faculty        @relation(fields: [facultyId], references: [id])
+  users         User[]         @relation("ProdiMembers")
+  gkmUsers      User[]         @relation("GKMProdi")
+  courses       Course[]
+  scheduleSlots ScheduleSlot[]
 
   @@map("prodi")
 }
@@ -103,6 +104,7 @@ model Semester {
 
   courses       Course[]
   teachingLoads TeachingLoad[]
+  scheduleSlots ScheduleSlot[]
 
   @@map("semesters")
 }
@@ -132,6 +134,7 @@ model User {
   notifications   Notification[]
   auditLogs       AuditLog[]
   locationUpdates CampusLocation[] @relation("LocationUpdatedBy")
+  scheduleSlots   ScheduleSlot[]
 
   @@map("users")
 }
@@ -150,6 +153,7 @@ model Course {
   prodi         Prodi          @relation(fields: [prodiId], references: [id])
   semester      Semester       @relation(fields: [semesterId], references: [id])
   teachingLoads TeachingLoad[]
+  scheduleSlots ScheduleSlot[]
 
   @@unique([code, semesterId])
   @@map("courses")
@@ -255,4 +259,28 @@ model AuditLog {
   user User? @relation(fields: [userId], references: [id])
 
   @@map("audit_logs")
+}
+
+model ScheduleSlot {
+  id          String   @id @default(cuid())
+  semesterId  String
+  userId      String
+  courseId    String
+  prodiId     String
+  roomName    String
+  className   String
+  day         String
+  startTime   String
+  endTime     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  semester Semester @relation(fields: [semesterId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  course   Course   @relation(fields: [courseId], references: [id])
+  prodi    Prodi    @relation(fields: [prodiId], references: [id])
+
+  @@index([userId, day])
+  @@index([day, startTime, roomName])
+  @@map("schedule_slots")
 }
