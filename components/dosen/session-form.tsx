@@ -11,9 +11,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
-import { MapPin, Globe, Crosshair, Save, Send, Wifi } from "lucide-react"
+import { MapPin, Globe, Crosshair, Save, Wifi } from "lucide-react"
 import { METHOD_LABELS, MAX_DARING } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
+import { HelpTip } from "@/components/ui/help-tip"
 
 const LURING = ["TATAP_MUKA", "PRAKTIKUM", "SEMINAR", "FIELD_STUDY"]
 const DARING = ["ZOOM", "GOOGLE_MEET", "MS_TEAMS", "LMS", "PLATFORM_LAIN"]
@@ -54,7 +55,7 @@ export function SessionForm({
   const isEdit = !!existingSession
 
   const [meetingNumber, setMeetingNumber] = useState(existingSession?.meetingNumber || 0)
-  const [date, setDate] = useState(existingSession?.date?.split("T")[0] || "")
+  const [date, setDate] = useState(existingSession?.date?.split("T")[0] || new Date().toISOString().split("T")[0])
   const [startTime, setStartTime] = useState(existingSession?.startTime || "")
   const [endTime, setEndTime] = useState(existingSession?.endTime || "")
   const [topic, setTopic] = useState(existingSession?.topic || "")
@@ -79,6 +80,7 @@ export function SessionForm({
   const [quotaLoading, setQuotaLoading] = useState(false)
 
   const [loading, setLoading] = useState(false)
+  const [publishAfterSave, setPublishAfterSave] = useState(false)
   const [urlError, setUrlError] = useState("")
 
   const isDaring = DARING.includes(method as any)
@@ -88,6 +90,20 @@ export function SessionForm({
       setMeetingNumber(1)
     }
   }, [isEdit, meetingNumber])
+
+  useEffect(() => {
+    if (!isEdit) {
+      fetch(`/api/sessions?teachingLoadId=${teachingLoadId}`)
+        .then(r => r.json())
+        .then(json => {
+          if (json.success && json.data?.length > 0) {
+            const maxMeeting = Math.max(...json.data.map((s: any) => s.meetingNumber))
+            setMeetingNumber(maxMeeting + 1)
+          }
+        })
+        .catch(() => {})
+    }
+  }, [isEdit, teachingLoadId])
 
   useEffect(() => {
     if (DARING.includes(method as any)) {
@@ -247,7 +263,7 @@ export function SessionForm({
     <div className="space-y-6 max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle>{isEdit ? "Edit Sesi" : "Tambah Sesi"} &mdash; {courseName}</CardTitle>
+          <CardTitle className="text-xl">{isEdit ? "Edit Sesi" : "Tambah Sesi"} &mdash; {courseName}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {daringQuota && (
@@ -261,7 +277,7 @@ export function SessionForm({
               daringQuota.remaining <= 1 ? "text-yellow-500" :
               "text-blue-500"
               }`} aria-hidden="true" />
-              <span className="text-sm font-medium">
+              <span className="text-base font-medium">
                 Sisa kuota daring: {daringQuota.remaining}/{MAX_DARING}
               </span>
             </div>
@@ -269,7 +285,7 @@ export function SessionForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="meetingNumber">Pertemuan ke-</Label>
+              <Label htmlFor="meetingNumber" className="text-base">Sesi pertemuan ke-</Label>
               <Input
                 id="meetingNumber"
                 type="number"
@@ -278,12 +294,13 @@ export function SessionForm({
                 value={meetingNumber}
                 onChange={(e) => setMeetingNumber(parseInt(e.target.value) || 0)}
                 required
+                className="text-base"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sessionType">Tipe Sesi</Label>
+              <Label htmlFor="sessionType" className="text-base">Jenis sesi</Label>
               <Select value={sessionType} onValueChange={setSessionType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-base"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NORMAL">Normal</SelectItem>
                   <SelectItem value="PENGGANTI">Pengganti</SelectItem>
@@ -295,28 +312,31 @@ export function SessionForm({
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Tanggal</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+              <Label htmlFor="date" className="text-base">Tanggal</Label>
+              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="text-base" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="startTime">Jam Mulai</Label>
-              <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
+              <Label htmlFor="startTime" className="text-base">Jam Mulai</Label>
+              <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="text-base" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endTime">Jam Selesai</Label>
-              <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
+              <Label htmlFor="endTime" className="text-base">Jam Selesai</Label>
+              <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="text-base" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="topic">Topik</Label>
-            <Input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} required placeholder="Materi perkuliahan" />
+            <Label htmlFor="topic" className="text-base">Topik</Label>
+            <Input id="topic" value={topic} onChange={(e) => setTopic(e.target.value)} required placeholder="Materi perkuliahan" className="text-base" />
           </div>
 
           <fieldset className="space-y-2">
-            <legend className="sr-only">Metode</legend>
+            <legend className="flex items-center gap-1 text-base font-medium mb-2">
+              Metode mengajar
+              <HelpTip text="Pilih cara mengajar: tatap muka langsung di kelas (luring) atau online via Zoom/Google Meet (daring)" />
+            </legend>
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground font-medium">Luring</p>
+              <p className="text-sm text-muted-foreground font-medium">Luring</p>
               <div className="flex flex-wrap gap-2">
                 {LURING.map((m) => (
                   <button
@@ -324,7 +344,7 @@ export function SessionForm({
                     type="button"
                     onClick={() => setMethod(m)}
                     aria-pressed={method === m}
-                    className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                    className={`px-4 py-3 rounded-lg text-base border transition-colors ${
                       method === m
                         ? "bg-green-100 border-green-500 text-green-800"
                         : "bg-background border-input hover:bg-muted"
@@ -336,7 +356,7 @@ export function SessionForm({
               </div>
             </div>
             <div className="space-y-2 mt-2">
-              <p className="text-xs text-muted-foreground font-medium">Daring</p>
+              <p className="text-sm text-muted-foreground font-medium">Daring</p>
               <div className="flex flex-wrap gap-2">
                 {DARING.map((m) => {
                   const disabled = m === method ? false : !!daringQuota && !daringQuota.isAvailable
@@ -347,7 +367,7 @@ export function SessionForm({
                       onClick={() => !disabled && setMethod(m)}
                       disabled={disabled && m !== method}
                       aria-pressed={method === m}
-                      className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                      className={`px-4 py-3 rounded-lg text-base border transition-colors ${
                         method === m
                           ? "bg-purple-100 border-purple-500 text-purple-800"
                           : disabled
@@ -368,7 +388,7 @@ export function SessionForm({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-green-600" aria-hidden="true" />
-                  <span className="text-sm font-medium">Validasi GPS</span>
+                  <span className="text-base font-medium">Validasi GPS</span>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={handleDetectGps} disabled={gpsStatus === "loading"}>
                   <Crosshair className="h-4 w-4 mr-2" aria-hidden="true" />
@@ -377,7 +397,7 @@ export function SessionForm({
               </div>
 
               {latitude && longitude && (
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                   <div>Lat: {latitude}</div>
                   <div>Lng: {longitude}</div>
                   {gpsAccuracy && <div>Akurasi: {gpsAccuracy}m</div>}
@@ -385,19 +405,19 @@ export function SessionForm({
               )}
 
               {gpsStatus === "valid" && gpsDistance !== null && (
-                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 p-2 rounded" aria-live="polite">
+                <div className="flex items-center gap-2 text-base text-green-700 bg-green-50 p-2 rounded" aria-live="polite">
                   <MapPin className="h-4 w-4" aria-hidden="true" />
                   <span>Lokasi valid &mdash; jarak {Math.round(gpsDistance)}m dari kampus ✓</span>
                 </div>
               )}
               {gpsStatus === "invalid" && gpsDistance !== null && (
-                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 p-2 rounded" aria-live="polite">
+                <div className="flex items-center gap-2 text-base text-red-700 bg-red-50 p-2 rounded" aria-live="polite">
                   <MapPin className="h-4 w-4" aria-hidden="true" />
                   <span>Lokasi di luar area kampus &mdash; jarak {Math.round(gpsDistance)}m &gt; 300m ✗</span>
                 </div>
               )}
               {gpsStatus === "error" && (
-                <p className="text-xs text-red-500" role="alert">Gagal validasi GPS. Coba lagi atau periksa izin lokasi.</p>
+                <p className="text-sm text-red-500" role="alert">Gagal validasi GPS. Coba lagi atau periksa izin lokasi.</p>
               )}
             </div>
           )}
@@ -406,21 +426,21 @@ export function SessionForm({
             <div className="space-y-3 p-4 rounded-lg border bg-gray-50">
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 text-purple-600" aria-hidden="true" />
-                <span className="text-sm font-medium">URL Platform</span>
+                <span className="text-base font-medium">URL Platform</span>
               </div>
               <Input
                 value={platformUrl}
                 onChange={(e) => setPlatformUrl(e.target.value)}
                 onBlur={handleUrlBlur}
                 placeholder="https://zoom.us/j/..."
-                className={urlError ? "border-red-500" : ""}
+                className={`text-base ${urlError ? "border-red-500" : ""}`}
               />
-              {urlError && <p className="text-xs text-red-500" role="alert">{urlError}</p>}
+              {urlError && <p className="text-sm text-red-500" role="alert">{urlError}</p>}
               {platformUrl && !urlError && isValidUrl(platformUrl) && (
-                <p className="text-xs text-green-600">URL valid ✓</p>
+                <p className="text-sm text-green-600">URL valid ✓</p>
               )}
               {daringQuota && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Kuota daring terpakai: {daringQuota.used}/{MAX_DARING}
                 </p>
               )}
@@ -431,28 +451,30 @@ export function SessionForm({
             <legend className="sr-only">Kehadiran Mahasiswa</legend>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="present" className="text-xs">Hadir</Label>
+                <Label htmlFor="present" className="text-sm">Hadir</Label>
                 <Input
                   id="present"
                   type="number"
                   min={0}
                   value={studentPresent}
                   onChange={(e) => setStudentPresent(e.target.value)}
+                  className="text-base"
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="absent" className="text-xs">Tidak Hadir</Label>
+                <Label htmlFor="absent" className="text-sm">Tidak Hadir</Label>
                 <Input
                   id="absent"
                   type="number"
                   min={0}
                   value={studentAbsent}
                   onChange={(e) => setStudentAbsent(e.target.value)}
+                  className="text-base"
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Total</Label>
-                <div className="flex h-10 items-center px-3 rounded-md border bg-muted text-sm">
+                <Label className="text-sm">Total</Label>
+                <div className="flex h-10 items-center px-3 rounded-md border bg-muted text-base">
                   {totalStudents}
                 </div>
               </div>
@@ -460,36 +482,34 @@ export function SessionForm({
           </fieldset>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Catatan (opsional)</Label>
+            <Label htmlFor="notes" className="text-base">Catatan (opsional)</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Catatan tambahan..."
               rows={3}
+              className="text-base"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex items-center gap-4 pt-4 border-t">
+            <label className="flex items-center gap-2 text-base cursor-pointer">
+              <input
+                type="checkbox"
+                checked={publishAfterSave}
+                onChange={(e) => setPublishAfterSave(e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              Langsung publish setelah simpan
+            </label>
+            <div className="flex-1" />
             <Button type="button" variant="outline" onClick={() => router.back()}>
               Batal
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => handleSubmit(false)}
-              disabled={loading}
-            >
+            <Button type="button" onClick={() => handleSubmit(publishAfterSave)} disabled={loading}>
               <Save className="h-4 w-4 mr-2" aria-hidden="true" />
-              {loading ? "Menyimpan..." : "Simpan Draft"}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => handleSubmit(true)}
-              disabled={loading}
-            >
-              <Send className="h-4 w-4 mr-2" aria-hidden="true" />
-              {loading ? "Menyimpan..." : "Simpan & Publish"}
+              {loading ? "Menyimpan..." : "Simpan"}
             </Button>
           </div>
         </CardContent>
