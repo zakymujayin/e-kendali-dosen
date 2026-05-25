@@ -285,9 +285,9 @@ export async function matchCourses(
     const existing = await prisma.course.findFirst({
       where: {
         code: entry.kodeMk,
-        prodiId: entry.prodiId,
+        semesterId,
       },
-      select: { id: true, code: true, name: true },
+      select: { id: true, code: true, name: true, prodiId: true },
     })
 
     results.push({
