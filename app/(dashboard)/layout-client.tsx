@@ -47,7 +47,7 @@ interface NotificationItem {
   createdAt: string
 }
 
-const roleMenus: Record<string, { label: string; sublabel?: string; href: string; icon: React.ElementType; badge?: number }[]> = {
+const roleMenus: Record<string, { label: string; href: string; icon: React.ElementType; badge?: number }[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
     { label: "Fakultas", href: "/dashboard/admin/fakultas", icon: Building2 },
@@ -60,9 +60,9 @@ const roleMenus: Record<string, { label: string; sublabel?: string; href: string
     { label: "Laporan", href: "/dashboard/admin/reports", icon: FileText },
   ],
   DOSEN: [
-    { label: "Dashboard", sublabel: "Beranda", href: "/dashboard/dosen", icon: LayoutDashboard },
-    { label: "MK Saya", sublabel: "Mata Kuliah", href: "/dashboard/dosen/courses", icon: BookOpen, badge: 0 },
-    { label: "Laporan", sublabel: "BKD", href: "/dashboard/dosen/reports", icon: Download },
+    { label: "Dashboard", href: "/dashboard/dosen", icon: LayoutDashboard },
+    { label: "MK Saya", href: "/dashboard/dosen/courses", icon: BookOpen, badge: 0 },
+    { label: "Laporan", href: "/dashboard/dosen/reports", icon: Download },
   ],
   GKM: [
     { label: "Dashboard", href: "/dashboard/gkm", icon: LayoutDashboard },
@@ -193,9 +193,6 @@ export function DashboardLayoutClient({
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="min-w-0">
                     <span className="text-sm">{item.label}</span>
-                    {item.sublabel && (
-                      <span className="text-xs text-muted-foreground block truncate">{item.sublabel}</span>
-                    )}
                   </div>
                   {(item as any).badge > 0 && (
                     <Badge className="ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs">
