@@ -127,7 +127,7 @@ export function mapColumns(raw: Record<string, unknown>): RawRow {
   }
 }
 
-export async function parseFile(buffer: ArrayBuffer): Promise<ParseResult> {
+export async function parseFile(buffer: ArrayBuffer, fileName?: string): Promise<ParseResult> {
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.load(buffer)
 
@@ -166,7 +166,7 @@ export async function parseFile(buffer: ArrayBuffer): Promise<ParseResult> {
 
   return {
     rows: filled,
-    fileName: workbook.name || "Jadwal",
+    fileName: fileName || "Jadwal",
     totalRows: filled.length,
   }
 }
