@@ -92,13 +92,13 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
       {data && dosen && (
         <>
           <div className="grid grid-cols-4 gap-4">
-            <Card className="hover:shadow-md transition-shadow border-l-4 border-blue-500">
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-teal-500">
               <CardHeader className="pb-2">
                 <CardTitle className="text-3xl font-bold">{dosen.totalSks}</CardTitle>
                 <CardDescription>Total SKS</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="hover:shadow-md transition-shadow border-l-4 border-green-500">
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-indigo-500">
               <CardHeader className="pb-2">
                 <CardTitle className="text-3xl font-bold">{dosen.totalPublished}/{dosen.totalTarget}</CardTitle>
                 <CardDescription>Progress</CardDescription>
