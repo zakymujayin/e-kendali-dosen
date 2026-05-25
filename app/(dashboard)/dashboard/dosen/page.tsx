@@ -34,7 +34,6 @@ export default async function DosenDashboardPage() {
     },
   })
 
-  const activeSemester = teachingLoads.find((tl) => tl.semester.isActive)
   const totalSessions = teachingLoads.reduce((acc, tl) => acc + tl.sessions.length, 0)
 
   const firstUnfinishedCourseId = teachingLoads.find((tl) => tl.sessions.length < tl.course.totalMeeting)?.course.id
