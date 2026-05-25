@@ -51,13 +51,13 @@ export default async function CourseDetailPage({
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Card className="hover:shadow-md transition-shadow border-l-4 border-blue-500">
+        <Card className="hover:shadow-md transition-shadow border-l-4 border-indigo-500">
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl font-bold">{publishedCount}/{teachingLoad.course.totalMeeting}</CardTitle>
             <CardDescription>Pertemuan Published</CardDescription>
           </CardHeader>
         </Card>
-        <Card className={`hover:shadow-md transition-shadow border-l-4 ${draftCount > 0 ? "border-orange-500" : "border-green-500"}`}>
+        <Card className={`hover:shadow-md transition-shadow border-l-4 ${draftCount > 0 ? "border-amber-500" : "border-green-500"}`}>
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl font-bold">{draftCount}</CardTitle>
             <CardDescription>Draft</CardDescription>
