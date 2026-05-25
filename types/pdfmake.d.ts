@@ -2,11 +2,16 @@ declare module "pdfmake/js/Printer.js" {
   import type { TDocumentDefinitions, BufferOptions } from "pdfmake/interfaces"
 
   class PdfPrinter {
-    constructor(fonts: Record<string, Record<string, string>>)
+    constructor(
+      fonts: Record<string, Record<string, string>>,
+      virtualfs: unknown,
+      urlResolver: { resolve: (url: string, headers?: Record<string, string>) => void; resolved: () => Promise<void> },
+      localAccessPolicy: (path: string) => boolean
+    )
     createPdfKitDocument(
       docDefinition: TDocumentDefinitions,
       options?: BufferOptions
-    ): PDFKit.PDFDocument
+    ): Promise<PDFKit.PDFDocument>
   }
 
   export default PdfPrinter

@@ -20,7 +20,7 @@ export async function GET(
       include: {
         teachingLoad: {
           include: {
-            course: { include: { prodi: true } },
+            course: { include: { prodi: { include: { faculty: true } } } },
             user: { select: { id: true, name: true, nidn: true } },
             semester: true,
           },
@@ -38,7 +38,7 @@ export async function GET(
 
     const pdfBuffer = await generateBapPdf({
       universityName: "Universitas",
-      facultyName: tl.course.prodi?.facultyId || undefined,
+      facultyName: tl.course.prodi?.faculty?.name || undefined,
       prodiName: tl.course.prodi?.name || "-",
       courseCode: tl.course.code,
       courseName: tl.course.name,

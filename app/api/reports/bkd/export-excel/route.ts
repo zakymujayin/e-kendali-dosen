@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 
     const filename = `Laporan_E-Kendali_Dosen_${data.semester?.name || "semester"}_${data.semester?.year || ""}.xlsx`.replace(/\s+/g, "_")
 
-    return new Response(buffer as BodyInit, {
+    return new Response(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${filename}"`,

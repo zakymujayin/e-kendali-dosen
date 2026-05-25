@@ -158,7 +158,12 @@ export async function generateBkdExcel(data: BkdReportData): Promise<Buffer> {
 }
 
 export async function generateBkdPdf(data: BkdReportData): Promise<Buffer> {
-  const printer = new PdfPrinter(fonts)
+  const printer = new PdfPrinter(
+    fonts,
+    null,
+    { resolve: () => {}, resolved: () => Promise.resolve() },
+    () => true
+  )
 
   const body: unknown[][] = [
     [
@@ -222,7 +227,7 @@ export async function generateBkdPdf(data: BkdReportData): Promise<Buffer> {
     },
   }
 
-  const pdfDoc = printer.createPdfKitDocument(docDefinition)
+  const pdfDoc = await printer.createPdfKitDocument(docDefinition)
   const chunks: Buffer[] = []
   return new Promise<Buffer>((resolve, reject) => {
     pdfDoc.on("data", (chunk: Buffer) => chunks.push(chunk))

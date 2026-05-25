@@ -40,7 +40,12 @@ interface BapData {
 }
 
 export async function generateBapPdf(data: BapData): Promise<Buffer> {
-  const printer = new PdfPrinter(fonts)
+  const printer = new PdfPrinter(
+    fonts,
+    null,
+    { resolve: () => {}, resolved: () => Promise.resolve() },
+    () => true
+  )
 
   const docDefinition: TDocumentDefinitions = {
     pageSize: "A4",
@@ -169,7 +174,7 @@ export async function generateBapPdf(data: BapData): Promise<Buffer> {
   }
 
   const options: BufferOptions = {}
-  const pdfDoc = printer.createPdfKitDocument(docDefinition, options)
+  const pdfDoc = await printer.createPdfKitDocument(docDefinition, options)
 
   return new Promise<Buffer>((resolve, reject) => {
     const chunks: Buffer[] = []
