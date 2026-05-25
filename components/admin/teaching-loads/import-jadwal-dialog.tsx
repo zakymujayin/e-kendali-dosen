@@ -174,7 +174,7 @@ export function ImportJadwalDialog({ open, onOpenChange, onSuccess }: Props) {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Pilih semester..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" className="min-w-[var(--radix-select-trigger-width)]">
                   {state.semesters.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name} {s.year} {s.isActive ? "(Aktif)" : ""}
@@ -275,7 +275,7 @@ export function ImportJadwalDialog({ open, onOpenChange, onSuccess }: Props) {
                             <SelectTrigger className="w-48">
                               <SelectValue placeholder="Pilih user..." />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent position="popper">
                               {m.candidates.map((c: any) => (
                                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                               ))}
