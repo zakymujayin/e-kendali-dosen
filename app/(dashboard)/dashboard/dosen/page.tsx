@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen, Clock, AlertTriangle, Download } from "lucide-react"
+import { BookOpen, Clock, AlertTriangle, Download, Plus } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 
@@ -32,6 +32,8 @@ export default async function DosenDashboardPage() {
 
   const activeSemester = teachingLoads.find((tl) => tl.semester.isActive)
   const totalSessions = teachingLoads.reduce((acc, tl) => acc + tl.sessions.length, 0)
+
+  const firstUnfinishedCourseId = teachingLoads.find((tl) => tl.sessions.length < tl.course.totalMeeting)?.course.id
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -65,6 +67,38 @@ export default async function DosenDashboardPage() {
             <div className="text-3xl font-bold">{draftCount}</div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {firstUnfinishedCourseId ? (
+          <Link href={`/dashboard/dosen/courses/${firstUnfinishedCourseId}/sessions/new`} className="block">
+            <Card className="hover:shadow-md transition-all hover:-translate-y-0.5 border-l-4 border-green-500 bg-green-50">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <Plus className="h-5 w-5 text-green-600" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="font-medium text-base">Buat Sesi Hari Ini</p>
+                  <p className="text-sm text-muted-foreground">Isi sesi perkuliahan untuk hari ini</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ) : null}
+        <Link href="/dashboard/dosen/courses" className="block">
+          <Card className="hover:shadow-md transition-all hover:-translate-y-0.5 border-l-4 border-blue-500 bg-blue-50">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <BookOpen className="h-5 w-5 text-blue-600" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-medium text-base">Lihat Semua MK Saya</p>
+                <p className="text-sm text-muted-foreground">{teachingLoads.length} mata kuliah</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <div>
