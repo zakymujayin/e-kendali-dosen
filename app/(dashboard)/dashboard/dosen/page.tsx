@@ -40,31 +40,34 @@ export default async function DosenDashboardPage() {
       <h1 className="text-2xl font-bold tracking-tight">Dashboard Dosen</h1>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className={`hover:shadow-md transition-shadow border-l-4 ${teachingLoads.length > 0 ? "border-blue-500" : "border-gray-300"}`}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">MK Diampu</CardTitle>
             <BookOpen className="h-4 w-4 text-blue-500" aria-hidden="true" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{teachingLoads.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">mata kuliah semester ini</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow border-l-4 border-green-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Sesi Published</CardTitle>
             <Clock className="h-4 w-4 text-green-500" aria-hidden="true" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{totalSessions}</div>
+            <p className="text-xs text-muted-foreground mt-1">sesi sudah dipublish</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
+        <Card className={`hover:shadow-md transition-shadow border-l-4 ${draftCount > 0 ? "border-red-500" : "border-green-500"}`}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Sesi Draft Belum Publish</CardTitle>
+            <CardTitle className="text-sm font-medium">Draft Belum Publish</CardTitle>
             <AlertTriangle className="h-4 w-4 text-orange-500" aria-hidden="true" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{draftCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">{draftCount > 0 ? "sesi belum dipublish" : "semua sudah publish ✓"}</p>
           </CardContent>
         </Card>
       </div>

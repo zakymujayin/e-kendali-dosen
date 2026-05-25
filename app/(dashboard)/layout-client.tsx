@@ -47,7 +47,7 @@ interface NotificationItem {
   createdAt: string
 }
 
-const roleMenus: Record<string, { label: string; sublabel?: string; href: string; icon: React.ElementType }[]> = {
+const roleMenus: Record<string, { label: string; sublabel?: string; href: string; icon: React.ElementType; badge?: number }[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
     { label: "Fakultas", href: "/dashboard/admin/fakultas", icon: Building2 },
@@ -61,7 +61,7 @@ const roleMenus: Record<string, { label: string; sublabel?: string; href: string
   ],
   DOSEN: [
     { label: "Dashboard", sublabel: "Beranda", href: "/dashboard/dosen", icon: LayoutDashboard },
-    { label: "MK Saya", sublabel: "Mata Kuliah", href: "/dashboard/dosen/courses", icon: BookOpen },
+    { label: "MK Saya", sublabel: "Mata Kuliah", href: "/dashboard/dosen/courses", icon: BookOpen, badge: 0 },
     { label: "Laporan", sublabel: "BKD", href: "/dashboard/dosen/reports", icon: Download },
   ],
   GKM: [
@@ -79,9 +79,11 @@ const roleMenus: Record<string, { label: string; sublabel?: string; href: string
 export function DashboardLayoutClient({
   user: initialUser,
   children,
+  draftCount = 0,
 }: {
   user: UserData
   children: React.ReactNode
+  draftCount?: number
 }) {
   const pathname = usePathname()
   const { data: session } = useSession()
@@ -91,7 +93,9 @@ export function DashboardLayoutClient({
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [notifLoading, setNotifLoading] = useState(false)
-  const menus = roleMenus[user.role] || roleMenus.DOSEN
+  const menus = (roleMenus[user.role] || roleMenus.DOSEN).map((item) =>
+    item.label === "MK Saya" ? { ...item, badge: draftCount } : item
+  )
 
   const roleColors: Record<string, string> = {
     ADMIN: "bg-red-100 text-red-800",
@@ -186,10 +190,17 @@ export function DashboardLayoutClient({
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <div>
-                  <span className="text-sm">{item.label}</span>
-                  {item.sublabel && (
-                    <span className="text-xs text-muted-foreground block">{item.sublabel}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-sm">{item.label}</span>
+                    {item.sublabel && (
+                      <span className="text-xs text-muted-foreground block truncate">{item.sublabel}</span>
+                    )}
+                  </div>
+                  {(item as any).badge > 0 && (
+                    <Badge className="ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs">
+                      {(item as any).badge}
+                    </Badge>
                   )}
                 </div>
               </Link>
