@@ -6,7 +6,8 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell
 } from "@/components/ui/table"
@@ -91,22 +92,30 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
       {data && dosen && (
         <>
           <div className="grid grid-cols-4 gap-4">
-            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Total SKS</p>
-              <p className="text-3xl font-bold">{dosen.totalSks}</p>
-            </CardContent></Card>
-            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Progress</p>
-              <p className="text-3xl font-bold">{dosen.totalPublished}/{dosen.totalTarget}</p>
-            </CardContent></Card>
-            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Daring / Luring</p>
-              <p className="text-3xl font-bold">{dosen.daringCount} / {dosen.luringCount}</p>
-            </CardContent></Card>
-            <Card className="hover:shadow-md transition-shadow"><CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Rata-rata Hadir</p>
-              <p className="text-3xl font-bold">{dosen.avgAttendance}%</p>
-            </CardContent></Card>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-blue-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-3xl font-bold">{dosen.totalSks}</CardTitle>
+                <CardDescription>Total SKS</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-green-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-3xl font-bold">{dosen.totalPublished}/{dosen.totalTarget}</CardTitle>
+                <CardDescription>Progress</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-purple-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-3xl font-bold">{dosen.daringCount} / {dosen.luringCount}</CardTitle>
+                <CardDescription>Daring / Luring</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="hover:shadow-md transition-shadow border-l-4 border-amber-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-3xl font-bold">{dosen.avgAttendance}%</CardTitle>
+                <CardDescription>Rata-rata Hadir</CardDescription>
+              </CardHeader>
+            </Card>
           </div>
 
           <Card>
@@ -125,16 +134,14 @@ export function DosenReportsClient({ semesters, activeSemesterId, userId }: Prop
                       <TableCell>{c.sks}</TableCell><TableCell>{c.published}</TableCell><TableCell>{c.target}</TableCell>
                        <TableCell>
                           <div className="flex items-center gap-2">
-                            <div className="w-24 bg-secondary rounded-full h-2.5">
-                              <div
-                                className={`h-2.5 rounded-full ${
-                                  c.progressPercent >= 80 ? "bg-green-500" :
-                                  c.progressPercent >= 50 ? "bg-yellow-500" :
-                                  "bg-red-500"
-                                }`}
-                                style={{ width: `${Math.min(c.progressPercent, 100)}%` }}
-                              />
-                            </div>
+                            <Progress
+                              value={c.progressPercent}
+                              className={`w-24 h-2.5 ${
+                                c.progressPercent >= 80 ? "[&>div]:bg-green-500" :
+                                c.progressPercent >= 50 ? "[&>div]:bg-yellow-500" :
+                                "[&>div]:bg-red-500"
+                              }`}
+                            />
                             <span className="text-sm font-medium">{c.progressPercent}%</span>
                           </div>
                         </TableCell>

@@ -8,9 +8,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import {
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem
-} from "@/components/ui/select"
 import { MapPin, Globe, Crosshair, Save, Wifi } from "lucide-react"
 import { METHOD_LABELS, MAX_DARING } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"

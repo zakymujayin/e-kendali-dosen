@@ -2,10 +2,8 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { SessionTable } from "@/components/dosen/session-table"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Printer } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { PrintButton } from "@/components/dosen/print-button"
 
 export default async function CourseDetailPage({
   params,
@@ -49,30 +47,27 @@ export default async function CourseDetailPage({
             {teachingLoad.course.code} · {teachingLoad.course.sks} SKS · {teachingLoad.semester.name} {teachingLoad.semester.year}
           </p>
         </div>
-        <Button variant="outline" onClick={() => window.print()} className="no-print" aria-label="Cetak halaman">
-          <Printer className="h-4 w-4 mr-2" aria-hidden="true" />
-          Cetak
-        </Button>
+        <PrintButton />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Card className="hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <p className="text-2xl font-bold">{publishedCount}/{teachingLoad.course.totalMeeting}</p>
-            <p className="text-sm text-muted-foreground">Pertemuan Published</p>
-          </CardContent>
+        <Card className="hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-2xl font-bold">{publishedCount}/{teachingLoad.course.totalMeeting}</CardTitle>
+            <CardDescription>Pertemuan Published</CardDescription>
+          </CardHeader>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <p className="text-2xl font-bold">{draftCount}</p>
-            <p className="text-sm text-muted-foreground">Draft</p>
-          </CardContent>
+        <Card className={`hover:shadow-md transition-shadow border-l-4 ${draftCount > 0 ? "border-orange-500" : "border-green-500"}`}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-2xl font-bold">{draftCount}</CardTitle>
+            <CardDescription>Draft</CardDescription>
+          </CardHeader>
         </Card>
-        <Card className="hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <p className="text-2xl font-bold">{progress}%</p>
-            <p className="text-sm text-muted-foreground">Progress</p>
-          </CardContent>
+        <Card className={`hover:shadow-md transition-shadow border-l-4 ${progress >= 80 ? "border-green-500" : progress >= 50 ? "border-yellow-500" : "border-red-500"}`}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-2xl font-bold">{progress}%</CardTitle>
+            <CardDescription>Progress</CardDescription>
+          </CardHeader>
         </Card>
       </div>
 

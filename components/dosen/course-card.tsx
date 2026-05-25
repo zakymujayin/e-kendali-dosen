@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 import { Clock, Wifi } from "lucide-react"
 
 interface CourseCardProps {
@@ -45,9 +46,9 @@ export function CourseCard({
           <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-lg">{course.name}</CardTitle>
-              <p className="text-base text-muted-foreground mt-0.5">
+              <CardDescription className="mt-0.5">
                 {course.code} · {course.sks} SKS
-              </p>
+              </CardDescription>
             </div>
             <Badge variant={progress >= 100 ? "default" : "secondary"}>
               {publishedSessions}/{course.totalMeeting}
@@ -56,12 +57,7 @@ export function CourseCard({
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="w-full bg-secondary rounded-full h-2">
-              <div
-                className="bg-primary h-2 rounded-full transition-all"
-                style={{ width: `${Math.min(progress, 100)}%` }}
-              />
-            </div>
+            <Progress value={Math.min(progress, 100)} className="h-2.5" />
 
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
