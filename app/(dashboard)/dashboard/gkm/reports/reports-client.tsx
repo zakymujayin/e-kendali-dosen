@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, Fragment } from "react"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
@@ -129,7 +129,7 @@ export function GKMLaporanClient({ prodiName, prodiId, semesters, activeSemester
                 </TableHeader>
                 <TableBody>
                   {data.dosen.map((d) => (
-                    <><TableRow key={d.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setExpandedDosen(expandedDosen === d.id ? null : d.id)} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setExpandedDosen(expandedDosen === d.id ? null : d.id); e.preventDefault(); } }}>
+                    <Fragment key={d.id}><TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => setExpandedDosen(expandedDosen === d.id ? null : d.id)} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setExpandedDosen(expandedDosen === d.id ? null : d.id); e.preventDefault(); } }}>
                       <TableCell className="font-medium">{d.name}<br /><span className="text-xs text-muted-foreground">{d.nidn}</span></TableCell>
                       <TableCell>{d.totalMk}</TableCell><TableCell>{d.totalSks}</TableCell>
                       <TableCell><Badge variant={d.progressPercent >= 100 ? "default" : "secondary"}>{d.progressPercent}%</Badge></TableCell>
@@ -155,7 +155,7 @@ export function GKMLaporanClient({ prodiName, prodiId, semesters, activeSemester
                           </Table>
                         </TableCell>
                       </TableRow>
-                    )}</>
+                    )}</Fragment>
                   ))}
                   {data.dosen.length === 0 && (
                     <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground" role="alert">Belum ada data</TableCell></TableRow>

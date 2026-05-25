@@ -21,6 +21,8 @@ interface SessionFormProps {
   courseId: string
   courseName: string
   courseTotalMeeting: number
+  defaultDate?: string
+  defaultStartTime?: string
   existingSession?: {
     id: string
     meetingNumber: number
@@ -52,6 +54,8 @@ export function SessionForm({
   courseId,
   courseName,
   courseTotalMeeting,
+  defaultDate,
+  defaultStartTime,
   existingSession,
 }: SessionFormProps) {
   const router = useRouter()
@@ -59,8 +63,8 @@ export function SessionForm({
 
   const [step, setStep] = useState(1)
   const [meetingNumber, setMeetingNumber] = useState(existingSession?.meetingNumber || 0)
-  const [date, setDate] = useState(existingSession?.date?.split("T")[0] || new Date().toISOString().split("T")[0])
-  const [startTime, setStartTime] = useState(existingSession?.startTime || "")
+  const [date, setDate] = useState(existingSession?.date?.split("T")[0] || defaultDate || new Date().toISOString().split("T")[0])
+  const [startTime, setStartTime] = useState(existingSession?.startTime || defaultStartTime || "")
   const [endTime, setEndTime] = useState(existingSession?.endTime || "")
   const [topic, setTopic] = useState(existingSession?.topic || "")
   const [method, setMethod] = useState(existingSession?.method || "")

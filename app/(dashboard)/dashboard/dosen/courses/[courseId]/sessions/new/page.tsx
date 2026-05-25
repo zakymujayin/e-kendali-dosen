@@ -5,10 +5,13 @@ import { SessionForm } from "@/components/dosen/session-form"
 
 export default async function NewSessionPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ courseId: string }>
+  searchParams: Promise<{ date?: string; startTime?: string }>
 }) {
   const { courseId } = await params
+  const { date: defaultDate, startTime: defaultStartTime } = await searchParams
   const session = await auth()
   if (!session?.user?.id) redirect("/login")
 
@@ -24,6 +27,8 @@ export default async function NewSessionPage({
       courseId={courseId}
       courseName={teachingLoad.course.name}
       courseTotalMeeting={teachingLoad.course.totalMeeting}
+      defaultDate={defaultDate}
+      defaultStartTime={defaultStartTime}
     />
   )
 }

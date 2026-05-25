@@ -6,8 +6,8 @@ import {
 import { BookOpen, Clock, AlertTriangle, Plus } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { QuickCreate } from "@/components/dosen/quick-create"
 
 export default async function DosenDashboardPage() {
   const session = await auth()
@@ -42,22 +42,8 @@ export default async function DosenDashboardPage() {
     <div className="space-y-6 animate-fade-in-up">
       <h1 className="text-2xl font-bold tracking-tight">Dashboard Dosen</h1>
 
-      {/* Quick Actions */}
-      {firstUnfinishedCourseId && (
-        <div className="flex flex-col items-start gap-2">
-          <Button asChild size="default">
-            <Link href="/dashboard/dosen/courses">
-              <Plus className="h-5 w-5 mr-2" /> Buat Sesi Hari Ini
-            </Link>
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            atau{" "}
-            <Link href="/dashboard/dosen/courses" className="text-primary hover:underline">
-              lihat semua MK Saya →
-            </Link>
-          </p>
-        </div>
-      )}
+      {/* Quick Create */}
+      <QuickCreate teachingLoads={teachingLoads} />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="hover:shadow-md transition-shadow border-l-4 border-teal-500">
