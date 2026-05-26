@@ -59,6 +59,7 @@ const roleMenus: Record<string, { label: string; href: string; icon: React.Eleme
     { label: "Penugasan", href: "/dashboard/admin/teaching-loads", icon: ClipboardList },
     { label: "Koordinat Kampus", href: "/dashboard/admin/campus", icon: MapPin },
     { label: "Laporan", href: "/dashboard/admin/reports", icon: FileText },
+    { label: "QR Scan", href: "/dashboard/admin/qr", icon: QrCode },
   ],
   DOSEN: [
     { label: "Dashboard", href: "/dashboard/dosen", icon: LayoutDashboard },
