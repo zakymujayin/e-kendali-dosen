@@ -28,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { BottomTabBar } from "@/components/ui/bottom-tab-bar"
 import type { Role } from "@prisma/client"
 
 interface UserData {
@@ -335,10 +336,11 @@ export function DashboardLayoutClient({
           </div>
         </header>
 
-        <main className="flex-1 p-6 animate-fade-in-up" id="main-content">
+        <main className="flex-1 p-6 animate-fade-in-up pb-20 lg:pb-0" id="main-content">
           {children}
         </main>
       </div>
+      <BottomTabBar />
     </div>
   )
 }
