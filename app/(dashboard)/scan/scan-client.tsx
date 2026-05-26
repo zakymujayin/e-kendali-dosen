@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Clock, MapPin, BookOpen, Calendar, Play, Loader2, GraduationCap } from "lucide-react"
+import { Clock, MapPin, BookOpen, Calendar, Play, Loader2, GraduationCap, Rocket, Pencil } from "lucide-react"
+import { toast } from "sonner"
 
 interface Props {
   userName: string
@@ -46,11 +47,16 @@ function getGreeting(): string {
   return "Selamat Malam"
 }
 
+function formatDate(): string {
+  return new Date().toISOString().split("T")[0]
+}
+
 export function ScanClient({ userName, role }: Props) {
   const router = useRouter()
   const [data, setData] = useState<MatchData | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedCourse, setSelectedCourse] = useState("")
+  const [quickStarting, setQuickStarting] = useState(false)
 
   useEffect(() => {
     fetch("/api/schedules/smart-match")
@@ -62,7 +68,36 @@ export function ScanClient({ userName, role }: Props) {
       .finally(() => setLoading(false))
   }, [])
 
-  function startSession(courseId?: string) {
+  async function quickStart(slotId: string, courseId: string) {
+    setQuickStarting(true)
+    try {
+      const res = await fetch("/api/sessions/quick-start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scheduleSlotId: slotId }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        toast.success("Sesi dimulai")
+        router.push(`/dashboard/dosen/courses/${courseId}/sessions/${json.data.sessionId}`)
+      } else {
+        toast.error(json.message || "Gagal memulai sesi")
+      }
+    } catch {
+      toast.error("Gagal memulai sesi")
+    } finally {
+      setQuickStarting(false)
+    }
+  }
+
+  function detailStart(slot: SlotData) {
+    const today = formatDate()
+    router.push(
+      `/dashboard/dosen/courses/${slot.courseId}/sessions/new?scheduleSlotId=${slot.id}&date=${today}&startTime=${slot.startTime}&endTime=${slot.endTime}`
+    )
+  }
+
+  function startManual(courseId?: string) {
     const id = courseId || selectedCourse
     if (id) {
       router.push(`/dashboard/dosen/courses/${id}/sessions/new`)
@@ -87,6 +122,9 @@ export function ScanClient({ userName, role }: Props) {
       </div>
     )
   }
+
+  const hasAnyScheduleToday = (data?.todaySchedules?.length ?? 0) > 0
+  const nextSchedule = data?.todaySchedules?.find((s) => !s.isActive)
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
@@ -121,30 +159,52 @@ export function ScanClient({ userName, role }: Props) {
             </div>
             <Button
               className="w-full text-base h-12"
-              onClick={() => startSession(data.active!.courseId)}
+              onClick={() => quickStart(data.active!.id, data.active!.courseId)}
+              disabled={quickStarting}
             >
-              <Play className="h-5 w-5 mr-2" />
-              Mulai Sesi Sekarang
+              <Rocket className="h-5 w-5 mr-2" />
+              {quickStarting ? "Memulai..." : "Mulai Cepat"}
             </Button>
+            <Button
+              variant="outline"
+              className="w-full text-base h-11"
+              onClick={() => detailStart(data.active!)}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Isi Detail (absensi, dll)
+            </Button>
+          </CardContent>
+        </Card>
+      ) : hasAnyScheduleToday ? (
+        <Card className="border-dashed">
+          <CardContent className="py-6 text-center">
+            <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-muted-foreground">Tidak ada jadwal perkuliahan aktif saat ini</p>
+            {nextSchedule && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Berikutnya: {nextSchedule.startTime} - {nextSchedule.courseName}
+              </p>
+            )}
           </CardContent>
         </Card>
       ) : (
         <Card className="border-dashed">
           <CardContent className="py-6 text-center text-muted-foreground">
             <Calendar className="h-8 w-8 mx-auto mb-2" />
-            <p>Tidak ada jadwal perkuliahan aktif saat ini</p>
+            <p>Tidak ada jadwal hari ini</p>
+            <p className="text-xs mt-1">Hubungi admin untuk import jadwal semester Anda</p>
           </CardContent>
         </Card>
       )}
 
-      {data?.todaySchedules && data.todaySchedules.length > 0 && (
+      {hasAnyScheduleToday && (
         <div className="space-y-2">
           <h2 className="text-sm font-medium text-muted-foreground">Jadwal Hari Ini</h2>
-          {data.todaySchedules.map((slot) => (
+          {data!.todaySchedules.map((slot) => (
             <Card
               key={slot.id}
               className={`cursor-pointer hover:bg-accent transition-colors ${slot.isActive ? "ring-2 ring-primary" : ""}`}
-              onClick={() => startSession(slot.courseId)}
+              onClick={() => detailStart(slot)}
             >
               <CardContent className="py-3 flex items-center gap-3">
                 <div className="text-sm font-medium text-muted-foreground w-16 shrink-0">
@@ -184,7 +244,7 @@ export function ScanClient({ userName, role }: Props) {
             <Button
               variant="outline"
               disabled={!selectedCourse}
-              onClick={() => startSession()}
+              onClick={() => startManual()}
             >
               <BookOpen className="h-4 w-4" />
             </Button>
