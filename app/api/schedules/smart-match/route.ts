@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { unauthorized } from "@/lib/api"
+import { cacheGet, cacheSet, ttlUntilMidnight } from "@/lib/redis"
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -12,6 +13,10 @@ export async function GET() {
     const days = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"]
     const today = days[now.getDay()]
     const currentTime = `${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`
+
+    const cacheKey = `schedule:${session.user.id}:${today}`
+    const cached = await cacheGet<any>(cacheKey)
+    if (cached) return NextResponse.json({ success: true, data: cached })
 
     const activeSemester = await prisma.semester.findFirst({
       where: { isActive: true },
@@ -69,17 +74,18 @@ export async function GET() {
       endTime: s.endTime,
     })
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        active: activeSlot ? { ...mapSlot(activeSlot), isActive: true } : null,
-        todaySchedules: todaySchedules.map((s) => ({ ...mapSlot(s), isActive: activeSlot?.id === s.id })),
-        allCourses: uniqueCourses.map((c) => ({ id: c.id, code: c.code, name: c.name, sks: c.sks })),
-        semester: activeSemester,
-        currentTime,
-        day: today,
-      },
-    })
+    const data = {
+      active: activeSlot ? { ...mapSlot(activeSlot), isActive: true } : null,
+      todaySchedules: todaySchedules.map((s) => ({ ...mapSlot(s), isActive: activeSlot?.id === s.id })),
+      allCourses: uniqueCourses.map((c) => ({ id: c.id, code: c.code, name: c.name, sks: c.sks })),
+      semester: activeSemester,
+      currentTime,
+      day: today,
+    }
+
+    await cacheSet(cacheKey, data, ttlUntilMidnight())
+
+    return NextResponse.json({ success: true, data })
   } catch (error) {
     console.error("Smart match error:", error)
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
