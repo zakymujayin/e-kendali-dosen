@@ -80,7 +80,7 @@ SheetHeader.displayName = "SheetHeader"
 const SheetFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "sticky bottom-0 bg-background border-t p-4 flex flex-col gap-2 sm:flex-row sm:justify-end",
+      "sticky bottom-0 bg-background border-t p-4 flex flex-col gap-2 sm:flex-row sm:items-center",
       className
     )}
     {...props}
