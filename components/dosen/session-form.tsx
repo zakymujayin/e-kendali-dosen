@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { SessionFormFields, SessionFieldValues, defaultSessionFieldValues } from "@/components/dosen/session-form-fields"
-import { isDaringMethod, MAX_DARING } from "@/lib/constants"
+import { isDaringMethod } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
 import { Loader2, Send, Save } from "lucide-react"
 
@@ -104,16 +104,6 @@ export function SessionForm({
       if (!isValidUrl(platformUrl)) {
         toast.error("URL platform tidak valid")
         return
-      }
-      if (!isEdit) {
-        try {
-          const qr = await fetch(`/api/teaching-loads/${teachingLoadId}/daring-quota`)
-          const qj = await qr.json()
-          if (qj.success && qj.data && !qj.data.isAvailable) {
-            toast.error(`Kuota daring habis (maks. ${MAX_DARING}×). Tidak dapat menyimpan sesi daring baru.`)
-            return
-          }
-        } catch { /* lanjut jika gagal fetch quota */ }
       }
     }
 

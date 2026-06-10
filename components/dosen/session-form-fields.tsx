@@ -8,7 +8,7 @@ import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel,
   SelectSeparator, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Globe, Wifi } from "lucide-react"
+import { Globe, Wifi, AlertCircle } from "lucide-react"
 import { MAX_DARING, isDaringMethod } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
 
@@ -124,12 +124,20 @@ export function SessionFormFields({
         <Label>Metode mengajar</Label>
         {daringQuota && (
           <div className={`flex items-center gap-2 p-2.5 rounded-lg border text-sm ${
-            daringQuota.remaining === 0 ? "bg-red-50 border-red-200 text-red-700" :
-            daringQuota.remaining <= 1 ? "bg-yellow-50 border-yellow-200 text-yellow-700" :
-            "bg-blue-50 border-blue-200 text-blue-700"
+            daringQuota.used >= MAX_DARING
+              ? "bg-amber-50 border-amber-200 text-amber-800"
+              : daringQuota.remaining <= 1
+              ? "bg-yellow-50 border-yellow-200 text-yellow-700"
+              : "bg-blue-50 border-blue-200 text-blue-700"
           }`}>
-            <Wifi className="h-4 w-4 shrink-0" />
-            <span>Sisa kuota daring: {daringQuota.remaining}/{MAX_DARING}</span>
+            {daringQuota.used >= MAX_DARING
+              ? <AlertCircle className="h-4 w-4 shrink-0" />
+              : <Wifi className="h-4 w-4 shrink-0" />}
+            <span>
+              {daringQuota.used >= MAX_DARING
+                ? `Daring sudah ${daringQuota.used}× — melebihi kuota ${MAX_DARING}. Tetap bisa disimpan.`
+                : `Sisa kuota daring: ${daringQuota.remaining}/${MAX_DARING}`}
+            </span>
           </div>
         )}
         <Select value={values.method} onValueChange={v => onChange({ method: v })}>
@@ -147,11 +155,11 @@ export function SessionFormFields({
             <SelectSeparator />
             <SelectGroup>
               <SelectLabel>Daring</SelectLabel>
-              <SelectItem value="ZOOM" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "ZOOM"}>Zoom Meeting</SelectItem>
-              <SelectItem value="GOOGLE_MEET" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "GOOGLE_MEET"}>Google Meet</SelectItem>
-              <SelectItem value="MS_TEAMS" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "MS_TEAMS"}>Microsoft Teams</SelectItem>
-              <SelectItem value="LMS" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "LMS"}>LMS / Moodle</SelectItem>
-              <SelectItem value="PLATFORM_LAIN" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "PLATFORM_LAIN"}>Platform Lain</SelectItem>
+              <SelectItem value="ZOOM">Zoom Meeting</SelectItem>
+              <SelectItem value="GOOGLE_MEET">Google Meet</SelectItem>
+              <SelectItem value="MS_TEAMS">Microsoft Teams</SelectItem>
+              <SelectItem value="LMS">LMS / Moodle</SelectItem>
+              <SelectItem value="PLATFORM_LAIN">Platform Lain</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
