@@ -198,7 +198,7 @@ export function SessionForm({
             onChange={handleChange}
             teachingLoadId={teachingLoadId}
           />
-          <div className="flex gap-2 justify-end p-4 border-t bg-background sticky bottom-0">
+          <div className="flex gap-2 justify-end p-4 border-t bg-background sticky bottom-16 lg:bottom-0">
             <Button
               type="button"
               variant="outline"

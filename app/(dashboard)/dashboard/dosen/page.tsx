@@ -2,8 +2,9 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { GraduationCap, Clock, CalendarDays, BookOpen, TrendingUp } from "lucide-react"
+import { GraduationCap, Clock, CalendarDays, BookOpen } from "lucide-react"
 
 const MK_COLORS = [
   "bg-indigo-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500",
@@ -51,47 +52,47 @@ export default async function DosenDashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Hero card */}
-      <div className="rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-5 shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-            <GraduationCap className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold leading-tight">{session.user.name || "Dosen"}</h1>
-            <p className="text-sm text-blue-100">{semesterLabel}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3 mt-5">
-          <div className="rounded-lg bg-white/15 p-3 text-center">
-            <div className="text-2xl font-bold">{teachingLoads.length}</div>
-            <div className="text-xs text-blue-100 mt-0.5">MK Diampu</div>
-          </div>
-          <div className="rounded-lg bg-white/15 p-3 text-center">
-            <div className="text-2xl font-bold">
-              {totalPublished}<span className="text-base text-blue-200">/{totalTarget}</span>
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <GraduationCap className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-base font-semibold leading-tight truncate">{session.user.name || "Dosen"}</h1>
+                <p className="text-xs text-muted-foreground mt-0.5">{semesterLabel}</p>
+              </div>
             </div>
-            <div className="text-xs text-blue-100 mt-0.5">Pertemuan</div>
+            <span className="shrink-0 text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+              {overallPct}%
+            </span>
           </div>
-          <div className="rounded-lg bg-white/15 p-3 text-center">
-            <div className="text-2xl font-bold">{draftCount}</div>
-            <div className="text-xs text-blue-100 mt-0.5">Draft</div>
-          </div>
-        </div>
 
-        <div className="mt-4 space-y-1.5">
-          <div className="flex justify-between text-xs text-blue-100 items-center">
-            <span className="flex items-center gap-1"><TrendingUp className="h-3.5 w-3.5" /> Progress semester</span>
-            <span className="font-semibold text-white">{overallPct}%</span>
+          <div className="mt-4 space-y-1.5">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Progress semester</span>
+              <span>{totalPublished} / {totalTarget} pertemuan</span>
+            </div>
+            <Progress value={overallPct} className="h-1.5" />
           </div>
-          <div className="w-full h-2 rounded-full bg-white/20 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-white transition-all duration-500"
-              style={{ width: `${overallPct}%` }}
-            />
+
+          <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t">
+            <div>
+              <div className="text-2xl font-bold">{teachingLoads.length}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">MK Diampu</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{totalPublished}<span className="text-sm font-normal text-muted-foreground">/{totalTarget}</span></div>
+              <div className="text-xs text-muted-foreground mt-0.5">Pertemuan</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{draftCount}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Draft</div>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Alerts perlu perhatian */}
       {todaySlots.length > 0 && (
@@ -151,33 +152,26 @@ export default async function DosenDashboardPage() {
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm leading-tight truncate group-hover:text-primary transition-colors">{tl.course.name}</p>
+                        <p className="font-semibold text-sm leading-tight truncate">{tl.course.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">{tl.course.code} · {tl.course.sks} SKS</p>
                       </div>
-                      <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full border ${
-                        pct >= 100 ? "bg-green-50 text-green-700 border-green-200" :
-                        pct >= 50  ? "bg-blue-50 text-blue-700 border-blue-200" :
-                        "bg-slate-50 text-slate-600 border-slate-200"
-                      }`}>
+                      <span className="shrink-0 text-xs text-muted-foreground font-medium">
                         {published}/{total}
                       </span>
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span className="font-medium">{pct}%</span>
-                        {daringCount > 0 && <span className="text-violet-500">Daring {daringCount}×</span>}
+                        <span>{pct}%</span>
+                        {daringCount > 0 && <span>Daring {daringCount}×</span>}
                       </div>
-                      <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            pct >= 100 ? "bg-green-500" :
-                            pct >= 50  ? "bg-blue-500" :
-                            pct > 0    ? "bg-amber-500" :
-                            "bg-slate-300"
-                          }`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
+                      <Progress
+                        value={pct}
+                        className={`h-1.5 ${
+                          pct >= 80 ? "[&>div]:bg-green-500" :
+                          pct >= 50 ? "[&>div]:bg-amber-500" :
+                          "[&>div]:bg-muted-foreground"
+                        }`}
+                      />
                     </div>
                   </CardContent>
                 </Card>
