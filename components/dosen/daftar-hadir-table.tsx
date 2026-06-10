@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose,
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
 } from "@/components/ui/sheet"
 import {
   SessionFormFields,
@@ -450,9 +450,6 @@ export function DaftarHadirTable({
                       </Button>
                     ) : (
                       <>
-                        <SheetClose asChild>
-                          <Button variant="outline" className="sm:w-auto w-full">Batal</Button>
-                        </SheetClose>
                         <Button
                           onClick={() => simpan(false)}
                           disabled={saving || publishing}
