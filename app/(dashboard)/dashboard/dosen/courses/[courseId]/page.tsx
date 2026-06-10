@@ -1,9 +1,46 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
-import { SessionTable } from "@/components/dosen/session-table"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { PrintButton } from "@/components/dosen/print-button"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
+import { DaftarHadirTable } from "@/components/dosen/daftar-hadir-table"
+
+const DAY_MAP: Record<string, number> = {
+  Senin: 1, Selasa: 2, Rabu: 3, Kamis: 4, Jumat: 5, Sabtu: 6, Minggu: 0,
+}
+
+function nextDayOfWeek(from: Date, targetDay: number): Date {
+  const d = new Date(from)
+  d.setDate(d.getDate() + 1)
+  while (d.getDay() !== targetDay) {
+    d.setDate(d.getDate() + 1)
+  }
+  return d
+}
+
+interface SlotInfo { day: string; startTime: string; endTime: string; roomName: string; className: string }
+
+function generateJadwal(slots: SlotInfo[], startDate: Date, total: number) {
+  const sorted = [...slots].sort((a, b) => (DAY_MAP[a.day] ?? 7) - (DAY_MAP[b.day] ?? 7))
+  const dates: { tanggal: string; hari: string; jam: string; ruang: string }[] = []
+
+  let cursor = new Date(startDate)
+  for (let i = 0; i < total; i++) {
+    const slot = sorted[i % sorted.length]
+    const dayNum = DAY_MAP[slot.day] ?? 1
+    cursor = nextDayOfWeek(cursor, dayNum)
+    const tgl = cursor.toISOString().split("T")[0]
+    const hari = slot.day.substring(0, 3)
+    dates.push({
+      tanggal: tgl,
+      hari,
+      jam: `${slot.startTime}-${slot.endTime}`,
+      ruang: slot.roomName,
+    })
+  }
+  return dates
+}
 
 export default async function CourseDetailPage({
   params,
@@ -14,70 +51,105 @@ export default async function CourseDetailPage({
   const session = await auth()
   if (!session?.user?.id) redirect("/login")
 
-  const teachingLoad = await prisma.teachingLoad.findFirst({
-    where: {
-      courseId,
-      userId: session.user.id,
-    },
+  const load = await prisma.teachingLoad.findFirst({
+    where: { courseId },
     include: {
-      course: true,
-      semester: true,
+      user: { select: { id: true, name: true, nidn: true } },
+      course: { include: { prodi: true, semester: true } },
     },
   })
 
-  if (!teachingLoad) redirect("/dashboard/dosen/courses")
+  if (!load) redirect("/dashboard/dosen/courses")
+
+  const isOwner = load.user.id === session.user.id
+  const canView = ["ADMIN", "GKM", "DEKANAT"].includes(session.user.role) || isOwner
+  if (!canView) redirect("/dashboard")
 
   const sessions = await prisma.lectureSession.findMany({
-    where: { teachingLoadId: teachingLoad.id },
+    where: { teachingLoadId: load.id },
     orderBy: { meetingNumber: "asc" },
   })
 
-  const publishedCount = sessions.filter((s) => s.status === "PUBLISHED").length
-  const draftCount = sessions.filter((s) => s.status === "DRAFT").length
-  const progress = teachingLoad.course.totalMeeting > 0
-    ? Math.round((publishedCount / teachingLoad.course.totalMeeting) * 100)
-    : 0
+  const scheduleSlots = await prisma.scheduleSlot.findMany({
+    where: { userId: load.user.id, courseId, semesterId: load.course.semesterId },
+    orderBy: { day: "asc" },
+  })
+
+  const jadwal = scheduleSlots.length > 0
+    ? generateJadwal(scheduleSlots, load.course.semester.startDate, load.course.totalMeeting)
+    : []
+
+  const kelas = scheduleSlots.length > 0 ? scheduleSlots[0].className : null
+
+  const sessionMap = new Map(sessions.map((s) => [s.meetingNumber, s]))
+  const initialPertemuan = Array.from({ length: load.course.totalMeeting }, (_, i) => {
+    const n = i + 1
+    const s = sessionMap.get(n)
+    const j = jadwal[i]
+    return s
+      ? {
+          no: n,
+          tanggal: s.date.toISOString().split("T")[0],
+          hari: "",
+          startTime: s.startTime !== "00:00" ? s.startTime : "",
+          endTime: s.endTime !== "00:00" ? s.endTime : "",
+          ruang: "",
+          materi: s.topic,
+          method: s.method || "",
+          hadir: s.studentPresent,
+          tidakHadir: s.studentAbsent,
+          status: s.status,
+          sessionId: s.id,
+          platformUrl: s.platformUrl || "",
+          latitude: s.latitude,
+          longitude: s.longitude,
+          gpsDistance: s.distanceMeters,
+          gpsValid: s.isGpsValid,
+        }
+      : {
+          no: n,
+          tanggal: j?.tanggal || "",
+          hari: j?.hari || "",
+          startTime: j?.jam?.split("-")[0] || "",
+          endTime: j?.jam?.split("-")[1] || "",
+          ruang: j?.ruang || "",
+          materi: "",
+          method: "",
+          hadir: 0,
+          tidakHadir: 0,
+          status: "",
+          sessionId: null,
+          platformUrl: "",
+          latitude: null,
+          longitude: null,
+          gpsDistance: null,
+          gpsValid: null,
+        }
+  })
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{teachingLoad.course.name}</h1>
-          <p className="text-muted-foreground">
-            {teachingLoad.course.code} · {teachingLoad.course.sks} SKS · {teachingLoad.semester.name} {teachingLoad.semester.year}
-          </p>
-        </div>
-        <PrintButton />
-      </div>
+    <div className="space-y-4 animate-fade-in-up">
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/dashboard/dosen/courses">
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Kembali
+        </Link>
+      </Button>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="hover:shadow-md transition-shadow border-l-4 border-indigo-500">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-2xl font-bold">{publishedCount}/{teachingLoad.course.totalMeeting}</CardTitle>
-            <CardDescription>Pertemuan Published</CardDescription>
-          </CardHeader>
-        </Card>
-        <Card className={`hover:shadow-md transition-shadow border-l-4 ${draftCount > 0 ? "border-amber-500" : "border-green-500"}`}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-2xl font-bold">{draftCount}</CardTitle>
-            <CardDescription>Draft</CardDescription>
-          </CardHeader>
-        </Card>
-        <Card className={`hover:shadow-md transition-shadow border-l-4 ${progress >= 80 ? "border-green-500" : progress >= 50 ? "border-yellow-500" : "border-red-500"}`}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-2xl font-bold">{progress}%</CardTitle>
-            <CardDescription>Progress</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-
-      <SessionTable
+      <DaftarHadirTable
         courseId={courseId}
-        teachingLoadId={teachingLoad.id}
-        sessions={sessions.map((s) => ({
-          ...s,
-          date: s.date.toISOString(),
-        }))}
+        teachingLoadId={load.id}
+        prodi={load.course.prodi.name}
+        totalMeeting={load.course.totalMeeting}
+        dosen={{ name: load.user.name, nidn: load.user.nidn }}
+        courseName={load.course.name}
+        courseCode={load.course.code}
+        sks={load.course.sks}
+        kelas={kelas}
+        semester={`${load.course.semester.name} ${load.course.semester.year}`}
+        jadwalInfo={scheduleSlots.map(s => `${s.day} ${s.startTime}-${s.endTime} (${s.roomName})`).join(", ")}
+        initialPertemuan={initialPertemuan}
+        isOwner={isOwner}
       />
     </div>
   )

@@ -1,82 +1,49 @@
 import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
-import { SessionTable } from "@/components/dosen/session-table"
+import { DaftarHadirTable } from "@/components/dosen/daftar-hadir-table"
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => "/",
 }))
 
-describe("SessionTable", () => {
+const p = (no: number, overrides = {}) => ({
+  no, tanggal: "", hari: "", startTime: "", endTime: "", ruang: "", materi: "", method: "",
+  hadir: 0, tidakHadir: 0, status: "", sessionId: null,
+  platformUrl: "", latitude: null, longitude: null, gpsDistance: null, gpsValid: null,
+  ...overrides,
+})
+
+describe("DaftarHadirTable", () => {
   const defaultProps = {
-    courseId: "c-1",
-    teachingLoadId: "tl-1",
-    sessions: [
-      {
-        id: "s-1",
-        meetingNumber: 1,
-        date: "2026-05-22T00:00:00.000Z",
-        startTime: "08:00",
-        endTime: "09:40",
-        topic: "Pengenalan HTML",
-        method: "TATAP_MUKA",
-        sessionType: "NORMAL",
-        studentPresent: 25,
-        studentTotal: 30,
-        status: "PUBLISHED",
-        _count: { documents: 0 },
-      },
-      {
-        id: "s-2",
-        meetingNumber: 2,
-        date: "2026-05-23T00:00:00.000Z",
-        startTime: "08:00",
-        endTime: "09:40",
-        topic: "CSS Dasar",
-        method: "ZOOM",
-        sessionType: "NORMAL",
-        studentPresent: 28,
-        studentTotal: 30,
-        status: "DRAFT",
-        _count: { documents: 0 },
-      },
+    courseId: "c-1", teachingLoadId: "tl-1", prodi: "Test Prodi", totalMeeting: 16,
+    dosen: { name: "Dr. Test", nidn: "12345" },
+    courseName: "Test Course", courseCode: "TST101", sks: 3,
+    kelas: "A", semester: "Ganjil 2025/2026", jadwalInfo: "Senin 08:00",
+    isOwner: true,
+    initialPertemuan: [
+      p(1, { tanggal: "2025-09-01", hari: "Sen", startTime: "08:00", endTime: "10:00", materi: "Pengenalan", method: "TATAP_MUKA", hadir: 28, tidakHadir: 2, status: "PUBLISHED", sessionId: "s-1" }),
     ],
   }
 
-  it("renders the Tambah Sesi button", () => {
-    render(<SessionTable {...defaultProps} />)
-    expect(screen.getByText("Tambah Sesi")).toBeDefined()
+  it("renders course title", () => {
+    render(<DaftarHadirTable {...defaultProps} />)
+    expect(screen.getByText("Test Course")).toBeDefined()
   })
 
-  it("renders session topics", () => {
-    render(<SessionTable {...defaultProps} />)
-    expect(screen.getByText("Pengenalan HTML")).toBeDefined()
-    expect(screen.getByText("CSS Dasar")).toBeDefined()
+  it("renders meeting cards in grid", () => {
+    render(<DaftarHadirTable {...defaultProps} />)
+    const items = screen.getAllByText(/#1/)
+    expect(items.length).toBeGreaterThan(0)
   })
 
-  it("shows PUBLISHED status badge", () => {
-    render(<SessionTable {...defaultProps} />)
-    expect(screen.getByText("PUBLISHED")).toBeDefined()
+  it("renders cetak button", () => {
+    render(<DaftarHadirTable {...defaultProps} />)
+    expect(screen.getByText("Cetak")).toBeDefined()
   })
 
-  it("shows DRAFT status badge", () => {
-    render(<SessionTable {...defaultProps} />)
-    expect(screen.getByText("DRAFT")).toBeDefined()
-  })
-
-  it("renders meeting numbers", () => {
-    render(<SessionTable {...defaultProps} />)
-    expect(screen.getByText("1")).toBeDefined()
-    expect(screen.getByText("2")).toBeDefined()
-  })
-
-  it("shows BAP download button when published sessions exist", () => {
-    render(<SessionTable {...defaultProps} />)
-    expect(screen.getByText("Download Semua BAP")).toBeDefined()
-  })
-
-  it("handles empty sessions list", () => {
-    render(<SessionTable {...defaultProps} sessions={[]} />)
-    expect(screen.getByText("Belum ada sesi perkuliahan")).toBeDefined()
+  it("renders progress text", () => {
+    render(<DaftarHadirTable {...defaultProps} />)
+    expect(screen.getByText(/terisi/)).toBeDefined()
   })
 })
