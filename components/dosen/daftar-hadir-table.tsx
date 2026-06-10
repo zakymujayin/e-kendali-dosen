@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -45,7 +45,6 @@ interface Props {
   courseId: string
   teachingLoadId: string
   totalMeeting: number
-  dosen: { name: string; nidn: string | null }
   prodi: string
   courseName: string
   courseCode: string
@@ -212,7 +211,7 @@ export function DaftarHadirTable({
 
       if (!doPublish) { toast.success("Tersimpan"); setSheetOpen(false); return }
 
-      setSaving(false); setPublishing(true)
+      setPublishing(true)
       const pr = await fetch(`/api/sessions/${sid}/publish`, { method: "PUT" })
       const pj = await pr.json()
       if (pj.success) { upd(selected, { status: "PUBLISHED" }); toast.success("Tersimpan & dipublish") }
@@ -240,7 +239,10 @@ export function DaftarHadirTable({
     if (!selected || !confirm("Hapus pertemuan ini?")) return
     const p = data.find(x => x.no === selected)!
     if (p.sessionId) {
-      await fetch(`/api/courses/${courseId}/sessions?meetingNumber=${selected}`, { method: "DELETE" })
+      try {
+        const r = await fetch(`/api/courses/${courseId}/sessions?meetingNumber=${selected}`, { method: "DELETE" })
+        if (!r.ok) { toast.error("Gagal menghapus"); return }
+      } catch { toast.error("Gagal menghapus"); return }
     }
     upd(selected, {
       tanggal: p.tanggal, hari: p.hari, startTime: p.startTime, endTime: p.endTime, ruang: p.ruang,
@@ -270,7 +272,13 @@ export function DaftarHadirTable({
     finally { setDownloading(false) }
   }
 
+  const handleFormChange = useCallback(
+    (patch: Partial<SessionFieldValues>) => setFormValues(prev => ({ ...prev, ...patch })),
+    []
+  )
+
   const activePertemuan = selected ? data.find(p => p.no === selected) : null
+  const activeSt = activePertemuan ? getMeetingStatus(activePertemuan) : null
 
   return (
     <div className="space-y-4">
@@ -378,10 +386,10 @@ export function DaftarHadirTable({
                 </div>
                 {activePertemuan.status && (
                   <Badge
-                    className={`w-fit text-xs ${STATUS_CONFIG[getMeetingStatus(activePertemuan)].badgeClass}`}
+                    className={`w-fit text-xs ${activeSt ? STATUS_CONFIG[activeSt].badgeClass : ""}`}
                     variant="outline"
                   >
-                    {STATUS_CONFIG[getMeetingStatus(activePertemuan)].label}
+                    {activeSt ? STATUS_CONFIG[activeSt].label : ""}
                   </Badge>
                 )}
               </SheetHeader>
@@ -421,7 +429,7 @@ export function DaftarHadirTable({
                 <>
                   <SessionFormFields
                     values={formValues}
-                    onChange={patch => setFormValues(prev => ({ ...prev, ...patch }))}
+                    onChange={handleFormChange}
                     teachingLoadId={teachingLoadId}
                   />
                   <SheetFooter>

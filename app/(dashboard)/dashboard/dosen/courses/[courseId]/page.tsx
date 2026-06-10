@@ -141,7 +141,6 @@ export default async function CourseDetailPage({
         teachingLoadId={load.id}
         prodi={load.course.prodi.name}
         totalMeeting={load.course.totalMeeting}
-        dosen={{ name: load.user.name, nidn: load.user.nidn }}
         courseName={load.course.name}
         courseCode={load.course.code}
         sks={load.course.sks}
