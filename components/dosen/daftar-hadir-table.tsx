@@ -15,7 +15,7 @@ import {
   SessionFieldValues,
   defaultSessionFieldValues,
 } from "@/components/dosen/session-form-fields"
-import { isDaringMethod, METHOD_LABELS } from "@/lib/constants"
+import { isDaringMethod, METHOD_LABELS, MAX_DARING } from "@/lib/constants"
 import {
   Printer, Loader2, CheckCircle2, Globe, Send, Save,
   ChevronLeft, ChevronRight, Calendar, AlertCircle,
@@ -195,6 +195,17 @@ export function DaftarHadirTable({
     if (isDaringMethod(p.method) && !p.platformUrl) {
       toast.error("URL platform wajib untuk sesi daring")
       return
+    }
+
+    if (isDaringMethod(p.method) && !p.sessionId) {
+      try {
+        const qr = await fetch(`/api/teaching-loads/${teachingLoadId}/daring-quota`)
+        const qj = await qr.json()
+        if (qj.success && qj.data && !qj.data.isAvailable) {
+          toast.error(`Kuota daring habis (maks. ${MAX_DARING}×). Tidak dapat menyimpan sesi daring baru.`)
+          return
+        }
+      } catch { /* lanjut jika gagal fetch quota */ }
     }
 
     setSaving(true)

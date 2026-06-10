@@ -182,7 +182,7 @@ export function SessionFormFields({
           <SelectTrigger>
             <SelectValue placeholder="Pilih metode mengajar..." />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-h-64">
             <SelectGroup>
               <SelectLabel>Luring</SelectLabel>
               <SelectItem value="TATAP_MUKA">Tatap Muka</SelectItem>
