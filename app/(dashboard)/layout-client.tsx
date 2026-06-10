@@ -270,7 +270,7 @@ export function DashboardLayoutClient({
             {notifOpen && (
               <>
               <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
-              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background border rounded-lg shadow-lg shadow-black/10 z-50">
+              <div className="fixed top-16 right-2 w-80 max-w-[calc(100vw-1rem)] bg-background border rounded-lg shadow-lg shadow-black/10 z-50">
                 <div className="p-3 border-b flex items-center justify-between">
                   <p className="font-semibold text-sm">Notifikasi</p>
                   {unreadCount > 0 && (

@@ -31,7 +31,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({
-  id,
+  id: _id,
   course,
   semester,
   publishedSessions,
@@ -43,32 +43,26 @@ export function CourseCard({
     <Link href={`/dashboard/dosen/courses/${course.id}`} tabIndex={0}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer focus-visible:ring-2 focus-visible:ring-ring">
         <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-lg">{course.name}</CardTitle>
-              <CardDescription className="mt-0.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <CardTitle className="text-base leading-snug">{course.name}</CardTitle>
+              <CardDescription className="mt-0.5 text-xs">
                 {course.code} · {course.sks} SKS
+                {semester && <> · {semester.name} {semester.year}</>}
               </CardDescription>
             </div>
-            <Badge variant={progress >= 100 ? "default" : "secondary"}>
+            <Badge variant={progress >= 100 ? "default" : "secondary"} className="shrink-0 text-xs">
               {publishedSessions}/{course.totalMeeting}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <Progress value={Math.min(progress, 100)} className="h-2.5" />
+          <div className="space-y-2">
+            <Progress value={Math.min(progress, 100)} className="h-2" />
 
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" aria-hidden="true" />
-                {publishedSessions} published · {draftSessions} draft
-              </span>
-              {semester && (
-                <span className="flex items-center gap-1">
-                  {semester.name} {semester.year}
-                </span>
-              )}
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />
+              <span>{publishedSessions} published{draftSessions > 0 && ` · ${draftSessions} draft`}</span>
             </div>
 
             {daringQuota && (

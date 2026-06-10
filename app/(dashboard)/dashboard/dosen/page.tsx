@@ -147,7 +147,7 @@ export default async function DosenDashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {teachingLoads.map((tl, idx) => {
             const published = tl.sessions.length
             const total = tl.course.totalMeeting
