@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { HelpTip } from "@/components/ui/help-tip"
 import { MapPin, Crosshair, Globe, Wifi, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import {
