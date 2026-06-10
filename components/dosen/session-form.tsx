@@ -96,11 +96,6 @@ export function SessionForm({
 
     const isDaring = isDaringMethod(method)
 
-    if (!isDaring && (!latitude || !longitude)) {
-      toast.error("Deteksi GPS wajib untuk sesi luring")
-      return
-    }
-
     if (isDaring) {
       if (!platformUrl) {
         toast.error("URL platform wajib diisi untuk sesi daring")

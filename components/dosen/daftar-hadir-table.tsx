@@ -188,10 +188,6 @@ export function DaftarHadirTable({
     const p = dataRef.current.find(x => x.no === selected)!
     if (!isComplete(p)) { toast.error("Lengkapi tanggal, materi, dan metode"); return }
 
-    if (!isDaringMethod(p.method) && (!p.latitude || !p.longitude)) {
-      toast.error("Deteksi GPS wajib untuk sesi luring")
-      return
-    }
     if (isDaringMethod(p.method) && !p.platformUrl) {
       toast.error("URL platform wajib untuk sesi daring")
       return

@@ -1,17 +1,14 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel,
   SelectSeparator, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { MapPin, Crosshair, Globe, Wifi, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
+import { Globe, Wifi } from "lucide-react"
 import { MAX_DARING, isDaringMethod } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
 
@@ -60,18 +57,11 @@ export function SessionFormFields({
   onChange,
   teachingLoadId,
 }: SessionFormFieldsProps) {
-  const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "valid" | "invalid" | "error">("idle")
   const [daringQuota, setDaringQuota] = useState<{ used: number; remaining: number; isAvailable: boolean } | null>(null)
   const [urlError, setUrlError] = useState("")
 
   const isDaring = isDaringMethod(values.method)
   const totalStudents = values.studentPresent + values.studentAbsent
-
-  useEffect(() => {
-    if (values.gpsValid === true) setGpsStatus("valid")
-    else if (values.gpsValid === false && values.latitude) setGpsStatus("invalid")
-    else setGpsStatus("idle")
-  }, [values.gpsValid, values.latitude])
 
   useEffect(() => {
     if (!isDaringMethod(values.method)) { setDaringQuota(null); return }
@@ -86,42 +76,6 @@ export function SessionFormFields({
     if (!isValidUrl(values.platformUrl)) setUrlError("URL tidak valid. Harus https://...")
     else setUrlError("")
   }, [values.platformUrl])
-
-  function handleDetectGps() {
-    if (!navigator.geolocation) { toast.error("GPS tidak didukung browser ini"); return }
-    setGpsStatus("loading")
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude.toFixed(6)
-        const lng = pos.coords.longitude.toFixed(6)
-        const acc = pos.coords.accuracy?.toFixed(1) || ""
-        try {
-          const res = await fetch("/api/campus/validate-gps", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lng) }),
-          })
-          const json = await res.json()
-          if (json.success && json.data) {
-            const { distanceMeters, isValid } = json.data
-            onChange({ latitude: lat, longitude: lng, gpsAccuracy: acc, gpsDistance: Math.round(distanceMeters), gpsValid: isValid })
-            setGpsStatus(isValid ? "valid" : "invalid")
-          } else {
-            onChange({ latitude: lat, longitude: lng, gpsAccuracy: acc, gpsDistance: null, gpsValid: false })
-            setGpsStatus("error")
-          }
-        } catch {
-          setGpsStatus("error")
-          toast.error("Gagal validasi GPS")
-        }
-      },
-      (err) => {
-        setGpsStatus("error")
-        toast.error(err.code === 1 ? "Akses GPS ditolak. Izinkan di browser." : "Gagal mendapatkan lokasi")
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
-  }
 
   return (
     <div className="space-y-5 p-6 pt-2">
@@ -202,49 +156,6 @@ export function SessionFormFields({
           </SelectContent>
         </Select>
       </div>
-
-      {!isDaring && values.method && (
-        <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-sm font-medium">
-              <MapPin className="h-4 w-4 text-green-600" />
-              Validasi GPS
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleDetectGps}
-              disabled={gpsStatus === "loading"}
-            >
-              {gpsStatus === "loading"
-                ? <><Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />Mendeteksi...</>
-                : <><Crosshair className="h-3.5 w-3.5 mr-2" />Deteksi Lokasi</>
-              }
-            </Button>
-          </div>
-          {values.latitude && values.longitude && (
-            <p className="text-xs text-muted-foreground">
-              {values.latitude}, {values.longitude}{values.gpsAccuracy ? ` · akurasi ${values.gpsAccuracy}m` : ""}
-            </p>
-          )}
-          {gpsStatus === "valid" && values.gpsDistance !== null && (
-            <Alert className="border-green-200 bg-green-50 text-green-800">
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>Lokasi valid — {values.gpsDistance}m dari kampus ✓</AlertDescription>
-            </Alert>
-          )}
-          {gpsStatus === "invalid" && values.gpsDistance !== null && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>Di luar area kampus — {values.gpsDistance}m &gt; 300m ✗</AlertDescription>
-            </Alert>
-          )}
-          {gpsStatus === "error" && (
-            <p className="text-sm text-destructive">Gagal validasi GPS. Periksa izin lokasi dan coba lagi.</p>
-          )}
-        </div>
-      )}
 
       {isDaring && values.method && (
         <div className="space-y-3 p-4 rounded-lg border bg-muted/50">

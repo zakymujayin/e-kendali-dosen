@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin, Globe, Crosshair, Save } from "lucide-react"
+import { MapPin, Globe, Save } from "lucide-react"
 import { METHOD_LABELS } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
 
@@ -43,56 +43,9 @@ export function QuickStartForm({
   const [platformUrl, setPlatformUrl] = useState("")
   const [publish, setPublish] = useState(false)
 
-  const [lat, setLat] = useState<number | null>(null)
-  const [lng, setLng] = useState<number | null>(null)
-  const [gpsAcc, setGpsAcc] = useState<number | null>(null)
-  const [campusLabel, setCampusLabel] = useState<string | null>(null)
-  const [gpsDistance, setGpsDistance] = useState<number | null>(null)
-  const [gpsValid, setGpsValid] = useState<boolean | null>(null)
-  const [gpsLoading, setGpsLoading] = useState(false)
-
   const [submitting, setSubmitting] = useState(false)
 
   const isDaring = DARING.includes(method)
-
-  useEffect(() => {
-    if (LURING.includes(method)) {
-      detectGps()
-    }
-  }, [method])
-
-  function detectGps() {
-    if (!navigator.geolocation) return
-    setGpsLoading(true)
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords
-        setLat(latitude)
-        setLng(longitude)
-        setGpsAcc(accuracy)
-        try {
-          const res = await fetch("/api/campus/validate-gps", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ latitude, longitude }),
-          })
-          if (res.ok) {
-            const j = await res.json()
-            if (j.data) {
-              setCampusLabel(j.data.label ?? null)
-              setGpsDistance(j.data.distance ?? null)
-              setGpsValid(j.data.distance !== null && j.data.distance <= (j.data.radiusMeters ?? 300))
-            }
-          }
-        } catch {
-          // validation failure non-fatal
-        }
-        setGpsLoading(false)
-      },
-      () => setGpsLoading(false),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    )
-  }
 
   async function handleSubmit() {
     if (!date || !startTime || !endTime || !topic || !method) {
@@ -120,14 +73,6 @@ export function QuickStartForm({
 
       if (isDaring && platformUrl) {
         body.platformUrl = platformUrl
-      }
-
-      if (lat != null && lng != null) {
-        body.latitude = lat
-        body.longitude = lng
-        body.gpsAccuracy = gpsAcc
-        body.distanceMeters = gpsDistance
-        body.isGpsValid = gpsValid
       }
 
       const res = await fetch("/api/sessions", {
@@ -234,25 +179,6 @@ export function QuickStartForm({
                 onChange={(e) => setPlatformUrl(e.target.value)}
                 placeholder="https://meet.google.com/xxx"
               />
-            </div>
-          )}
-
-          {!isDaring && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-              <Crosshair className="h-4 w-4" />
-              {gpsLoading ? (
-                "Mendeteksi lokasi..."
-              ) : gpsValid ? (
-                <span className="text-green-600">
-                  Terdeteksi: {campusLabel ?? "Kampus"} ({gpsDistance}m)
-                </span>
-              ) : lat ? (
-                <span className="text-amber-600">Di luar area kampus ({gpsDistance}m)</span>
-              ) : (
-                <Button type="button" variant="ghost" size="sm" onClick={detectGps}>
-                  Deteksi lokasi
-                </Button>
-              )}
             </div>
           )}
         </CardContent>
