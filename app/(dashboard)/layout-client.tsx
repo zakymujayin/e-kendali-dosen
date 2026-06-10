@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { BottomTabBar } from "@/components/ui/bottom-tab-bar"
+import type { ElementType } from "react"
 import type { Role } from "@prisma/client"
 
 interface UserData {
@@ -40,6 +41,13 @@ interface UserData {
   image?: string | null
 }
 
+interface MenuItem {
+  label: string
+  href: string
+  icon: ElementType
+  badge?: number
+}
+
 interface NotificationItem {
   id: string
   title: string
@@ -49,7 +57,7 @@ interface NotificationItem {
   createdAt: string
 }
 
-const roleMenus: Record<string, { label: string; href: string; icon: React.ElementType; badge?: number }[]> = {
+const roleMenus: Record<string, MenuItem[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
     { label: "Fakultas", href: "/dashboard/admin/fakultas", icon: Building2 },
@@ -166,7 +174,7 @@ export function DashboardLayoutClient({
         <div className="flex h-16 items-center justify-between px-6 border-b">
           <Link href="/dashboard" className="font-bold text-lg tracking-tight flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary" aria-hidden="true" />
-            e-Kendali Dosen
+            e-Jurnal Dosen
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -198,9 +206,9 @@ export function DashboardLayoutClient({
                   <div className="min-w-0">
                     <span className="text-sm">{item.label}</span>
                   </div>
-                  {(item as any).badge > 0 && (
+                  {item.badge != null && item.badge > 0 && (
                     <Badge className="ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs">
-                      {(item as any).badge}
+                      {item.badge}
                     </Badge>
                   )}
                 </div>
@@ -260,7 +268,9 @@ export function DashboardLayoutClient({
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white border rounded-lg shadow-lg shadow-black/5 z-50">
+              <>
+              <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background border rounded-lg shadow-lg shadow-black/10 z-50">
                 <div className="p-3 border-b flex items-center justify-between">
                   <p className="font-semibold text-sm">Notifikasi</p>
                   {unreadCount > 0 && (
@@ -317,6 +327,7 @@ export function DashboardLayoutClient({
                   )}
                 </div>
               </div>
+              </>
             )}
           </div>
 

@@ -335,7 +335,7 @@ export function DaftarHadirTable({
               <div className="flex items-center justify-between gap-2 mb-1">
                 <span className="text-xs font-bold text-muted-foreground">#{p.no}</span>
                 {cfg.label && (
-                  <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded border ${cfg.badgeClass}`}>
+                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded border ${cfg.badgeClass}`}>
                     {cfg.label}
                   </span>
                 )}

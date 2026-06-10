@@ -161,10 +161,10 @@ export default async function DosenDashboardPage() {
                   <CardContent className="p-3 space-y-2">
                     <div>
                       <p className="font-semibold text-xs leading-tight line-clamp-2">{tl.course.name}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{tl.course.code} · {tl.course.sks} SKS</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{tl.course.code} · {tl.course.sks} SKS</p>
                     </div>
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] text-muted-foreground">
+                      <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{published}/{total}</span>
                         <span>{pct}%</span>
                       </div>
