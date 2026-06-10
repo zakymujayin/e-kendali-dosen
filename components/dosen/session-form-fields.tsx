@@ -7,15 +7,12 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { HelpTip } from "@/components/ui/help-tip"
-import { MapPin, Crosshair, Globe, Wifi, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import {
-  METHOD_LABELS,
-  MAX_DARING,
-  LURING_METHODS,
-  DARING_METHODS,
-  isDaringMethod,
-} from "@/lib/constants"
+  Select, SelectContent, SelectGroup, SelectItem, SelectLabel,
+  SelectSeparator, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import { MapPin, Crosshair, Globe, Wifi, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
+import { MAX_DARING, isDaringMethod } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
 
 export interface SessionFieldValues {
@@ -169,12 +166,8 @@ export function SessionFormFields({
         />
       </div>
 
-      <fieldset className="space-y-3">
-        <legend className="flex items-center gap-1 text-sm font-medium">
-          Metode mengajar
-          <HelpTip text="Luring = tatap muka di kelas. Daring = online (Zoom, Meet, dll.)" />
-        </legend>
-
+      <div className="space-y-2">
+        <Label>Metode mengajar</Label>
         {daringQuota && (
           <div className={`flex items-center gap-2 p-2.5 rounded-lg border text-sm ${
             daringQuota.remaining === 0 ? "bg-red-50 border-red-200 text-red-700" :
@@ -185,55 +178,30 @@ export function SessionFormFields({
             <span>Sisa kuota daring: {daringQuota.remaining}/{MAX_DARING}</span>
           </div>
         )}
-
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Luring</p>
-          <div className="flex flex-wrap gap-2">
-            {LURING_METHODS.map(m => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => onChange({ method: m })}
-                aria-pressed={values.method === m}
-                className={`px-4 py-2 rounded-lg text-sm border transition-colors ${
-                  values.method === m
-                    ? "bg-green-100 border-green-500 text-green-800 font-medium"
-                    : "bg-background border-input hover:bg-muted"
-                }`}
-              >
-                {METHOD_LABELS[m]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Daring</p>
-          <div className="flex flex-wrap gap-2">
-            {DARING_METHODS.map(m => {
-              const disabled = m !== values.method && !!daringQuota && !daringQuota.isAvailable
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => !disabled && onChange({ method: m })}
-                  disabled={disabled}
-                  aria-pressed={values.method === m}
-                  className={`px-4 py-2 rounded-lg text-sm border transition-colors ${
-                    values.method === m
-                      ? "bg-purple-100 border-purple-500 text-purple-800 font-medium"
-                      : disabled
-                      ? "bg-muted border-input text-muted-foreground cursor-not-allowed"
-                      : "bg-background border-input hover:bg-muted"
-                  }`}
-                >
-                  {METHOD_LABELS[m]}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      </fieldset>
+        <Select value={values.method} onValueChange={v => onChange({ method: v })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Pilih metode mengajar..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Luring</SelectLabel>
+              <SelectItem value="TATAP_MUKA">Tatap Muka</SelectItem>
+              <SelectItem value="PRAKTIKUM">Praktikum</SelectItem>
+              <SelectItem value="SEMINAR">Seminar</SelectItem>
+              <SelectItem value="FIELD_STUDY">Studi Lapangan</SelectItem>
+            </SelectGroup>
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectLabel>Daring</SelectLabel>
+              <SelectItem value="ZOOM" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "ZOOM"}>Zoom Meeting</SelectItem>
+              <SelectItem value="GOOGLE_MEET" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "GOOGLE_MEET"}>Google Meet</SelectItem>
+              <SelectItem value="MS_TEAMS" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "MS_TEAMS"}>Microsoft Teams</SelectItem>
+              <SelectItem value="LMS" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "LMS"}>LMS / Moodle</SelectItem>
+              <SelectItem value="PLATFORM_LAIN" disabled={!!daringQuota && !daringQuota.isAvailable && values.method !== "PLATFORM_LAIN"}>Platform Lain</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
 
       {!isDaring && values.method && (
         <div className="space-y-3 p-4 rounded-lg border bg-muted/50">

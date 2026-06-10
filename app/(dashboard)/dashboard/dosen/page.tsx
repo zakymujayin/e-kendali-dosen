@@ -94,7 +94,13 @@ export default async function DosenDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Alerts perlu perhatian */}
+      {(todaySlots.length > 0 || draftCount > 0) && (
+        <div className="flex items-center gap-3">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide shrink-0">Perlu Perhatian</h2>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+      )}
+
       {todaySlots.length > 0 && (
         <Alert className="border-yellow-300 bg-yellow-50 text-yellow-900">
           <CalendarDays className="h-4 w-4" />
@@ -128,7 +134,11 @@ export default async function DosenDashboardPage() {
         </Alert>
       )}
 
-      {/* Grid MK */}
+      <div className="flex items-center gap-3">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide shrink-0">Mata Kuliah Diampu</h2>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+
       {teachingLoads.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
@@ -137,36 +147,30 @@ export default async function DosenDashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {teachingLoads.map((tl, idx) => {
             const published = tl.sessions.length
             const total = tl.course.totalMeeting
             const pct = total > 0 ? Math.round((published / total) * 100) : 0
-            const daringCount = tl.sessions.filter(s => s.isDaring).length
             const color = MK_COLORS[idx % MK_COLORS.length]
 
             return (
               <Link key={tl.id} href={`/dashboard/dosen/courses/${tl.course.id}`} className="group block">
                 <Card className="overflow-hidden hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
                   <div className={`h-1 ${color}`} />
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-sm leading-tight truncate">{tl.course.name}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{tl.course.code} · {tl.course.sks} SKS</p>
-                      </div>
-                      <span className="shrink-0 text-xs text-muted-foreground font-medium">
-                        {published}/{total}
-                      </span>
+                  <CardContent className="p-3 space-y-2">
+                    <div>
+                      <p className="font-semibold text-xs leading-tight line-clamp-2">{tl.course.name}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{tl.course.code} · {tl.course.sks} SKS</p>
                     </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] text-muted-foreground">
+                        <span>{published}/{total}</span>
                         <span>{pct}%</span>
-                        {daringCount > 0 && <span>Daring {daringCount}×</span>}
                       </div>
                       <Progress
                         value={pct}
-                        className={`h-1.5 ${
+                        className={`h-1 ${
                           pct >= 80 ? "[&>div]:bg-green-500" :
                           pct >= 50 ? "[&>div]:bg-amber-500" :
                           "[&>div]:bg-muted-foreground"
