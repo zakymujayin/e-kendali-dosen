@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -174,6 +174,11 @@ export function SessionForm({
     router.refresh()
   }
 
+  const handleChange = useCallback(
+    (patch: Partial<SessionFieldValues>) => setValues(prev => ({ ...prev, ...patch })),
+    []
+  )
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card>
@@ -190,7 +195,7 @@ export function SessionForm({
         <CardContent className="p-0">
           <SessionFormFields
             values={values}
-            onChange={patch => setValues(prev => ({ ...prev, ...patch }))}
+            onChange={handleChange}
             teachingLoadId={teachingLoadId}
           />
           <div className="flex gap-2 justify-end p-4 border-t bg-background sticky bottom-0">
@@ -207,7 +212,6 @@ export function SessionForm({
               type="button"
               onClick={() => save(true)}
               disabled={saving || publishing}
-              className="bg-green-600 hover:bg-green-700"
             >
               {publishing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               Simpan & Publish

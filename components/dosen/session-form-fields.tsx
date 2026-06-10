@@ -128,7 +128,6 @@ export function SessionFormFields({
 
   return (
     <div className="space-y-5 p-6 pt-2">
-      {/* Tanggal & Jam */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="sf-date">Tanggal</Label>
@@ -159,7 +158,6 @@ export function SessionFormFields({
         </div>
       </div>
 
-      {/* Materi */}
       <div className="space-y-2">
         <Label htmlFor="sf-topic">Materi / Topik</Label>
         <Textarea
@@ -171,7 +169,6 @@ export function SessionFormFields({
         />
       </div>
 
-      {/* Metode */}
       <fieldset className="space-y-3">
         <legend className="flex items-center gap-1 text-sm font-medium">
           Metode mengajar
@@ -238,7 +235,6 @@ export function SessionFormFields({
         </div>
       </fieldset>
 
-      {/* GPS — hanya luring */}
       {!isDaring && values.method && (
         <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
           <div className="flex items-center justify-between">
@@ -282,7 +278,6 @@ export function SessionFormFields({
         </div>
       )}
 
-      {/* URL Platform — hanya daring */}
       {isDaring && values.method && (
         <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
           <span className="flex items-center gap-2 text-sm font-medium">
@@ -304,7 +299,6 @@ export function SessionFormFields({
         </div>
       )}
 
-      {/* Kehadiran */}
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="sf-present">Hadir</Label>
@@ -334,7 +328,6 @@ export function SessionFormFields({
         </div>
       </div>
 
-      {/* Catatan */}
       <div className="space-y-2">
         <Label htmlFor="sf-notes">Catatan (opsional)</Label>
         <Textarea
