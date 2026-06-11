@@ -14,7 +14,7 @@ export default async function QrPage() {
         <h1 className="text-2xl font-bold">QR Code Scan Perkuliahan</h1>
         <p className="text-muted-foreground">Generate dan cetak QR Code untuk ditempel di kelas</p>
       </div>
-      <QrGeneratorClient scanUrl={`${baseUrl}/scan`} />
+      <QrGeneratorClient scanUrl={`${baseUrl}/scan?via=qr`} />
     </div>
   )
 }

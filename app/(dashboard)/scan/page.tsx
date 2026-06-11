@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { ScanClient } from "./scan-client"
@@ -8,7 +9,9 @@ export default async function ScanPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/50">
-      <ScanClient userName={session.user.name || ""} role={session.user.role || ""} />
+      <Suspense fallback={null}>
+        <ScanClient userName={session.user.name || ""} role={session.user.role || ""} />
+      </Suspense>
     </div>
   )
 }

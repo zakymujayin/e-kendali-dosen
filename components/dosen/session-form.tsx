@@ -17,6 +17,7 @@ interface SessionFormProps {
   courseTotalMeeting: number
   defaultDate?: string
   defaultStartTime?: string
+  defaultMethod?: string
   existingSession?: {
     id: string
     meetingNumber: number
@@ -44,6 +45,7 @@ export function SessionForm({
   courseTotalMeeting,
   defaultDate,
   defaultStartTime,
+  defaultMethod,
   existingSession,
 }: SessionFormProps) {
   const router = useRouter()
@@ -61,7 +63,7 @@ export function SessionForm({
     startTime: existingSession?.startTime || defaultStartTime || "",
     endTime: existingSession?.endTime || "",
     topic: existingSession?.topic || "",
-    method: existingSession?.method || "",
+    method: existingSession?.method || defaultMethod || "",
     studentPresent: existingSession?.studentPresent ?? 0,
     studentAbsent: existingSession?.studentAbsent ?? 0,
     platformUrl: existingSession?.platformUrl || "",

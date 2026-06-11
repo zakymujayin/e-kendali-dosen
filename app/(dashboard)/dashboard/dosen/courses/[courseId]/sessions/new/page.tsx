@@ -9,10 +9,10 @@ export default async function NewSessionPage({
   searchParams,
 }: {
   params: Promise<{ courseId: string }>
-  searchParams: Promise<{ date?: string; startTime?: string; endTime?: string; scheduleSlotId?: string }>
+  searchParams: Promise<{ date?: string; startTime?: string; endTime?: string; scheduleSlotId?: string; method?: string }>
 }) {
   const { courseId } = await params
-  const { date: defaultDate, startTime: defaultStartTime, endTime: defaultEndTime, scheduleSlotId } = await searchParams
+  const { date: defaultDate, startTime: defaultStartTime, endTime: defaultEndTime, scheduleSlotId, method: defaultMethod } = await searchParams
   const session = await auth()
   if (!session?.user?.id) redirect("/login")
 
@@ -43,6 +43,7 @@ export default async function NewSessionPage({
       courseTotalMeeting={teachingLoad.course.totalMeeting}
       defaultDate={defaultDate}
       defaultStartTime={defaultStartTime}
+      defaultMethod={defaultMethod}
     />
   )
 }

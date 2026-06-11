@@ -28,11 +28,13 @@ export async function proxy(req: NextRequest) {
 
   if (isStatic || isAuthApi) return
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET })
   const user = token as { role: Role; id: string; prodiId?: string | null } | null
 
   if (!user && !isPublic && !isApi) {
-    return NextResponse.redirect(new URL("/login", req.url))
+    const url = new URL("/login", req.url)
+    url.searchParams.set("callbackUrl", pathname + req.nextUrl.search)
+    return NextResponse.redirect(url)
   }
 
   if (!user && isApi && !isAuthApi) {

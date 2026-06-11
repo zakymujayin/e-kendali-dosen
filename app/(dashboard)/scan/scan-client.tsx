@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -53,6 +53,9 @@ function formatDate(): string {
 
 export function ScanClient({ userName, role }: Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const viaQr = searchParams.get("via") === "qr"
+  const methodParam = viaQr ? "&method=TATAP_MUKA" : ""
   const [data, setData] = useState<MatchData | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedCourse, setSelectedCourse] = useState("")
@@ -93,14 +96,14 @@ export function ScanClient({ userName, role }: Props) {
   function detailStart(slot: SlotData) {
     const today = formatDate()
     router.push(
-      `/dashboard/dosen/courses/${slot.courseId}/sessions/new?scheduleSlotId=${slot.id}&date=${today}&startTime=${slot.startTime}&endTime=${slot.endTime}`
+      `/dashboard/dosen/courses/${slot.courseId}/sessions/new?scheduleSlotId=${slot.id}&date=${today}&startTime=${slot.startTime}&endTime=${slot.endTime}${methodParam}`
     )
   }
 
   function startManual(courseId?: string) {
     const id = courseId || selectedCourse
     if (id) {
-      router.push(`/dashboard/dosen/courses/${id}/sessions/new`)
+      router.push(`/dashboard/dosen/courses/${id}/sessions/new${viaQr ? "?method=TATAP_MUKA" : ""}`)
     }
   }
 
