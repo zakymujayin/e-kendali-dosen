@@ -53,6 +53,7 @@ export function SessionForm({
   const [sessionType] = useState(existingSession?.sessionType || "NORMAL")
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
 
   const [values, setValues] = useState<SessionFieldValues>({
     ...defaultSessionFieldValues,
@@ -151,6 +152,16 @@ export function SessionForm({
       return
     }
 
+    const newId = data.data?.id
+    if (photoFile && newId) {
+      const fd = new FormData()
+      fd.append("file", photoFile)
+      fd.append("sessionId", newId)
+      try { await fetch("/api/documents", { method: "POST", body: fd }) }
+      catch { toast.error("Foto gagal diunggah, sesi tetap tersimpan") }
+      setPhotoFile(null)
+    }
+
     if (doPublish && data.data?.id) {
       const pubRes = await fetch(`/api/sessions/${data.data.id}/publish`, { method: "PUT" })
       const pubData = await pubRes.json()
@@ -192,6 +203,8 @@ export function SessionForm({
             values={values}
             onChange={handleChange}
             teachingLoadId={teachingLoadId}
+            photoFile={photoFile}
+            onPhotoChange={setPhotoFile}
           />
           <div className="flex gap-2 justify-end p-4 border-t bg-background sticky bottom-16 lg:bottom-0">
             <Button

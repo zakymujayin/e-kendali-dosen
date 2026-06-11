@@ -124,6 +124,7 @@ export function DaftarHadirTable({
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
 
   const data = dataRef.current
   const terisi = data.filter(p => p.tanggal && p.materi).length
@@ -139,6 +140,7 @@ export function DaftarHadirTable({
     setSelected(no)
     setFormValues(toFormValues(p))
     setSheetOpen(true)
+    setPhotoFile(null)
   }
 
   function navigate(dir: number) {
@@ -204,6 +206,15 @@ export function DaftarHadirTable({
       if (!j.success) { toast.error(j.message || "Gagal menyimpan"); return }
       const sid = j.data.id
       upd(selected, { sessionId: sid, status: j.data.status })
+
+      if (photoFile) {
+        const fd = new FormData()
+        fd.append("file", photoFile)
+        fd.append("sessionId", sid)
+        try { await fetch("/api/documents", { method: "POST", body: fd }) }
+        catch { toast.error("Foto gagal diunggah, sesi tetap tersimpan") }
+        setPhotoFile(null)
+      }
 
       if (!doPublish) { toast.success("Tersimpan"); setSheetOpen(false); return }
 
@@ -427,6 +438,8 @@ export function DaftarHadirTable({
                     values={formValues}
                     onChange={handleFormChange}
                     teachingLoadId={teachingLoadId}
+                    photoFile={photoFile}
+                    onPhotoChange={setPhotoFile}
                   />
                   <SheetFooter>
                     <button

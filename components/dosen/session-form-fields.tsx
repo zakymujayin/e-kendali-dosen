@@ -50,12 +50,16 @@ interface SessionFormFieldsProps {
   values: SessionFieldValues
   onChange: (patch: Partial<SessionFieldValues>) => void
   teachingLoadId: string
+  photoFile?: File | null
+  onPhotoChange?: (file: File | null) => void
 }
 
 export function SessionFormFields({
   values,
   onChange,
   teachingLoadId,
+  photoFile,
+  onPhotoChange,
 }: SessionFormFieldsProps) {
   const [daringQuota, setDaringQuota] = useState<{ used: number; remaining: number; isAvailable: boolean } | null>(null)
   const [urlError, setUrlError] = useState("")
@@ -214,6 +218,22 @@ export function SessionFormFields({
           </div>
         </div>
       </div>
+
+      {onPhotoChange && (
+        <div className="space-y-2">
+          <Label htmlFor="sf-photo">Foto (opsional)</Label>
+          <Input
+            id="sf-photo"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={e => onPhotoChange(e.target.files?.[0] ?? null)}
+          />
+          {photoFile && (
+            <p className="text-xs text-muted-foreground">Terlampir: {photoFile.name}</p>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="sf-notes">Catatan (opsional)</Label>
