@@ -14,7 +14,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
 import { Users, BookOpen, CheckCircle2, Clock } from "lucide-react"
-import { METHOD_LABELS } from "@/lib/constants"
+import { METHOD_LABELS, MAX_DARING, isDaringMethod } from "@/lib/constants"
 
 interface DosenItem {
   id: string
@@ -43,7 +43,7 @@ interface Props {
   semesterId?: string
 }
 
-export function MonitoringClient({ prodiName, dosenList, semesterId }: Props) {
+export function MonitoringClient({ prodiName, dosenList, semesterId: _semesterId }: Props) {
   const [sessions, setSessions] = useState<SessionItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDosen, setSelectedDosen] = useState("all")
@@ -75,6 +75,16 @@ export function MonitoringClient({ prodiName, dosenList, semesterId }: Props) {
       return true
     })
   }, [sessions, dateFrom, dateTo])
+
+  const daringPerCourse = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const s of filteredSessions) {
+      if (isDaringMethod(s.method)) {
+        map.set(s.teachingLoad.course.id, (map.get(s.teachingLoad.course.id) || 0) + 1)
+      }
+    }
+    return map
+  }, [filteredSessions])
 
   const stats = {
     total: filteredSessions.length,
@@ -184,7 +194,16 @@ export function MonitoringClient({ prodiName, dosenList, semesterId }: Props) {
                 filteredSessions.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell className="font-medium">{s.teachingLoad.user.name}</TableCell>
-                    <TableCell>{s.teachingLoad.course.name}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span>{s.teachingLoad.course.name}</span>
+                        {(daringPerCourse.get(s.teachingLoad.course.id) || 0) > MAX_DARING && (
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200">
+                            Daring {daringPerCourse.get(s.teachingLoad.course.id)}× · melebihi {MAX_DARING}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{s.meetingNumber}</TableCell>
                     <TableCell className="text-xs whitespace-nowrap">
                       {format(new Date(s.date), "dd MMM yyyy", { locale: id })}
