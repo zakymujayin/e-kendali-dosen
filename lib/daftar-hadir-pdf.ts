@@ -1,8 +1,7 @@
 import type { TDocumentDefinitions, BufferOptions } from "pdfmake/interfaces"
 import path from "path"
-import fs from "fs"
-import sharp from "sharp"
 import { MAX_DARING } from "@/lib/constants"
+import { loadLetterheadLogo, letterheadContent } from "@/lib/pdf-letterhead"
 
 // pdfmake CJS/ESM dual-export workaround for Next.js
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -41,12 +40,7 @@ export interface JurnalData {
 }
 
 export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
-  // Load & trim logo (remove transparent whitespace)
-  const logoPath = path.resolve(process.cwd(), "public/logo.png")
-  let logoBase64: string | null = null
-  if (fs.existsSync(logoPath)) {
-    logoBase64 = "data:image/png;base64," + (await sharp(logoPath).trim().png().toBuffer()).toString("base64")
-  }
+  const logoBase64 = await loadLetterheadLogo()
 
   const printer = new PdfPrinter(
     fonts,
@@ -78,6 +72,8 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
   }
 
   const daringCount = data.pertemuan.filter((p) => p.metode === "Daring").length
+  const terlaksana = data.pertemuan.filter((p) => p.materi).length
+  const totalPertemuan = data.pertemuan.length
   const daringNote =
     daringCount > MAX_DARING
       ? `Jumlah sesi daring: ${daringCount} (melebihi kuota ${MAX_DARING})`
@@ -89,18 +85,7 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
     pageMargins: [40, 50, 40, 40],
     defaultStyle: { font: "Roboto", fontSize: 10 },
     content: [
-      ...(logoBase64
-        ? [{ image: logoBase64, width: 50, absolutePosition: { x: 90, y: 52 } }]
-        : []),
-      { text: "KEMENTERIAN AGAMA REPUBLIK INDONESIA", style: "kop1" },
-      { text: "UNIVERSITAS ISLAM NEGERI", style: "kop2" },
-      { text: "SULTAN MAULANA HASANUDDIN BANTEN", style: "kop2" },
-      { text: "FAKULTAS USHULUDDIN DAN ADAB", style: "kop3" },
-      { text: "Jl. Syekh Nawawi Al Bantani Kp Andamui Sukawana Curug Kota Serang Banten 42171", style: "kop4" },
-      { text: "Telp (0254) 200323-208849  Fax (0254) 200022", style: "kop4" },
-      { text: "Website: www.fuda.uinbanten.ac.id  E-mail: surat@uinbanten.ac.id", style: "kop4" },
-      { canvas: [{ type: "line", x1: 0, y1: 0, x2: 495, y2: 0, lineWidth: 3 }], margin: [0, 2, 0, 1] },
-      { canvas: [{ type: "line", x1: 0, y1: 0, x2: 495, y2: 0, lineWidth: 1 }], margin: [0, 0, 0, 12] },
+      ...letterheadContent(logoBase64),
 
       { text: "DAFTAR HADIR DOSEN", style: "title", margin: [0, 0, 0, 10] },
 
@@ -159,6 +144,21 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
       },
 
       {
+        text: [
+          { text: "Keterangan: ", bold: true },
+          "L = Luring (tatap muka), D = Daring (kuliah online)",
+        ],
+        fontSize: 9,
+        margin: [0, 0, 0, 4],
+      },
+
+      {
+        text: `Jumlah pertemuan terlaksana: ${terlaksana} dari ${totalPertemuan}`,
+        fontSize: 9,
+        margin: [0, 0, 0, 4],
+      },
+
+      {
         text: daringNote,
         fontSize: 9,
         italics: true,
@@ -175,6 +175,7 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
             width: "auto",
             alignment: "left",
             stack: [
+              { text: "Serang, ____________________", margin: [0, 0, 0, 4] },
               { text: "Mengetahui,", margin: [0, 0, 0, 4] },
               { text: "Ketua Program Studi,", margin: [0, 0, 0, 40] },
               { text: "(__________________________)" },
@@ -186,10 +187,6 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
       },
     ],
     styles: {
-      kop1: { font: "Roboto", fontSize: 11, bold: true, alignment: "center" },
-      kop2: { font: "Roboto", fontSize: 10, bold: true, alignment: "center" },
-      kop3: { font: "Roboto", fontSize: 12, bold: true, alignment: "center" },
-      kop4: { font: "Roboto", fontSize: 8, alignment: "center", italics: true },
       title: {
         font: "Roboto",
         fontSize: 13,

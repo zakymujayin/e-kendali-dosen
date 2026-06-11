@@ -1,18 +1,19 @@
-import PdfPrinter from "pdfmake/js/Printer.js"
 import type { TDocumentDefinitions, BufferOptions } from "pdfmake/interfaces"
+import path from "path"
+import { loadLetterheadLogo, letterheadContent } from "@/lib/pdf-letterhead"
 
+// pdfmake CJS/ESM dual-export workaround for Next.js
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const m = require("pdfmake/js/Printer.js")
+const PdfPrinter = m.default?.default || m.default || m
+
+const RB = path.resolve(process.cwd(), "node_modules/pdfmake/fonts/Roboto")
 const fonts = {
-  Times: {
-    normal: "Times-Roman",
-    bold: "Times-Bold",
-    italics: "Times-Italic",
-    bolditalics: "Times-BoldItalic",
-  },
-  Helvetica: {
-    normal: "Helvetica",
-    bold: "Helvetica-Bold",
-    italics: "Helvetica-Oblique",
-    bolditalics: "Helvetica-BoldOblique",
+  Roboto: {
+    normal: RB + "/Roboto-Regular.ttf",
+    bold: RB + "/Roboto-Medium.ttf",
+    italics: RB + "/Roboto-Italic.ttf",
+    bolditalics: RB + "/Roboto-MediumItalic.ttf",
   },
 }
 
@@ -40,6 +41,8 @@ interface BapData {
 }
 
 export async function generateBapPdf(data: BapData): Promise<Buffer> {
+  const logoBase64 = await loadLetterheadLogo()
+
   const printer = new PdfPrinter(
     fonts,
     null,
@@ -49,21 +52,13 @@ export async function generateBapPdf(data: BapData): Promise<Buffer> {
 
   const docDefinition: TDocumentDefinitions = {
     pageSize: "A4",
-    pageMargins: [60, 50, 60, 50],
-    defaultStyle: { font: "Times", fontSize: 11 },
+    pageMargins: [40, 50, 40, 50],
+    defaultStyle: { font: "Roboto", fontSize: 11 },
     content: [
-      { text: "KEMENTERIAN PENDIDIKAN DAN KEBUDAYAAN", style: "kop" },
-      ...(data.facultyName
-        ? [{ text: data.facultyName.toUpperCase(), style: "kop", margin: [0, 2, 0, 0] }]
-        : []),
-      { text: `PROGRAM STUDI ${data.prodiName.toUpperCase()}`, style: "kop", margin: [0, 2, 0, 0] },
-      { text: "BERITA ACARA PERKULIAHAN", style: "title", margin: [0, 16, 0, 0] },
-      { text: "(BAP)", style: "title", margin: [0, 2, 0, 16] },
+      ...letterheadContent(logoBase64),
 
-      {
-        canvas: [{ type: "line", x1: 0, y1: 0, x2: 490, y2: 0, lineWidth: 1 }],
-        margin: [0, 0, 0, 16],
-      },
+      { text: "BERITA ACARA PERKULIAHAN", style: "title", margin: [0, 4, 0, 0] },
+      { text: "(BAP)", style: "title", margin: [0, 2, 0, 16] },
 
       {
         table: {
@@ -133,40 +128,33 @@ export async function generateBapPdf(data: BapData): Promise<Buffer> {
           ]
         : []),
 
-      { text: "\n\n\n" },
+      { text: "\n\n" },
       {
         columns: [
           { width: "*", text: "" },
           {
             width: "auto",
-            alignment: "center",
+            alignment: "left",
             stack: [
+              { text: `Serang, ${data.date}`, margin: [0, 0, 0, 4] },
               { text: "Dosen Pengampu,", margin: [0, 0, 0, 50] },
-              { text: data.dosenName, bold: true },
+              { text: data.dosenName, bold: true, decoration: "underline" },
               { text: `NIDN. ${data.dosenNidn}` },
             ],
           },
-          { width: "*", text: "" },
         ],
       },
     ],
     styles: {
-      kop: {
-        font: "Helvetica",
-        fontSize: 10,
-        bold: true,
-        alignment: "center",
-        lineHeight: 1.2,
-      },
       title: {
-        font: "Helvetica",
+        font: "Roboto",
         fontSize: 13,
         bold: true,
         alignment: "center",
         decoration: "underline",
       },
       section: {
-        font: "Helvetica",
+        font: "Roboto",
         fontSize: 10,
         bold: true,
       },
