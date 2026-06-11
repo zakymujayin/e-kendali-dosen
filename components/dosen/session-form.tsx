@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { SessionFormFields, SessionFieldValues, defaultSessionFieldValues } from "@/components/dosen/session-form-fields"
 import { isDaringMethod } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
@@ -52,7 +56,7 @@ export function SessionForm({
   const isEdit = !!existingSession
 
   const [meetingNumber, setMeetingNumber] = useState(existingSession?.meetingNumber || 1)
-  const [sessionType] = useState(existingSession?.sessionType || "NORMAL")
+  const [sessionType, setSessionType] = useState(existingSession?.sessionType || "NORMAL")
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
@@ -201,6 +205,19 @@ export function SessionForm({
           )}
         </CardHeader>
         <CardContent className="p-0">
+          <div className="px-6 pt-4 space-y-2">
+            <Label htmlFor="sf-sessiontype">Jenis Sesi</Label>
+            <Select value={sessionType} onValueChange={setSessionType}>
+              <SelectTrigger id="sf-sessiontype">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NORMAL">Normal</SelectItem>
+                <SelectItem value="PENGGANTI">Pengganti</SelectItem>
+                <SelectItem value="TAMBAHAN">Tambahan</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <SessionFormFields
             values={values}
             onChange={handleChange}
