@@ -4,7 +4,8 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { GraduationCap, Clock, CalendarDays, BookOpen } from "lucide-react"
+import { GraduationCap, Clock, CalendarDays, BookOpen, AlertCircle } from "lucide-react"
+import { getOverdueMeetings, type SlotInfo } from "@/lib/jadwal"
 
 const MK_COLORS = [
   "bg-indigo-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500",
@@ -43,6 +44,25 @@ export default async function DosenDashboardPage() {
         include: { course: true },
       })
     : []
+
+  const allSlots = activeSemester
+    ? await prisma.scheduleSlot.findMany({
+        where: { userId, semesterId: activeSemester.id },
+        select: { courseId: true, day: true, startTime: true, endTime: true, roomName: true, className: true },
+      })
+    : []
+
+  let overdueTotal = 0
+  if (activeSemester) {
+    for (const tl of teachingLoads) {
+      const slots: SlotInfo[] = allSlots
+        .filter(s => s.courseId === tl.course.id)
+        .map(s => ({ day: s.day, startTime: s.startTime, endTime: s.endTime, roomName: s.roomName, className: s.className }))
+      if (slots.length === 0) continue
+      const filled = new Set(tl.sessions.map(s => s.meetingNumber))
+      overdueTotal += getOverdueMeetings(slots, activeSemester.startDate, tl.course.totalMeeting, filled).length
+    }
+  }
 
   const totalPublished = teachingLoads.reduce((acc, tl) => acc + tl.sessions.length, 0)
   const totalTarget = teachingLoads.reduce((acc, tl) => acc + tl.course.totalMeeting, 0)
@@ -94,11 +114,23 @@ export default async function DosenDashboardPage() {
         </CardContent>
       </Card>
 
-      {(todaySlots.length > 0 || draftCount > 0) && (
+      {(todaySlots.length > 0 || draftCount > 0 || overdueTotal > 0) && (
         <div className="flex items-center gap-3">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide shrink-0">Perlu Perhatian</h2>
           <div className="flex-1 h-px bg-border" />
         </div>
+      )}
+
+      {overdueTotal > 0 && (
+        <Alert className="border-orange-300 bg-orange-50 text-orange-900">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>{overdueTotal} pertemuan sudah lewat tapi belum diisi jurnalnya.</span>
+            <Link href="/dashboard/dosen/courses" className="text-sm font-medium underline underline-offset-2 shrink-0">
+              Isi sekarang →
+            </Link>
+          </AlertDescription>
+        </Alert>
       )}
 
       {todaySlots.length > 0 && (

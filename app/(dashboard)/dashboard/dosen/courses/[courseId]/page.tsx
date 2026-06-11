@@ -5,42 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { DaftarHadirTable } from "@/components/dosen/daftar-hadir-table"
-
-const DAY_MAP: Record<string, number> = {
-  Senin: 1, Selasa: 2, Rabu: 3, Kamis: 4, Jumat: 5, Sabtu: 6, Minggu: 0,
-}
-
-function nextDayOfWeek(from: Date, targetDay: number): Date {
-  const d = new Date(from)
-  d.setDate(d.getDate() + 1)
-  while (d.getDay() !== targetDay) {
-    d.setDate(d.getDate() + 1)
-  }
-  return d
-}
-
-interface SlotInfo { day: string; startTime: string; endTime: string; roomName: string; className: string }
-
-function generateJadwal(slots: SlotInfo[], startDate: Date, total: number) {
-  const sorted = [...slots].sort((a, b) => (DAY_MAP[a.day] ?? 7) - (DAY_MAP[b.day] ?? 7))
-  const dates: { tanggal: string; hari: string; jam: string; ruang: string }[] = []
-
-  let cursor = new Date(startDate)
-  for (let i = 0; i < total; i++) {
-    const slot = sorted[i % sorted.length]
-    const dayNum = DAY_MAP[slot.day] ?? 1
-    cursor = nextDayOfWeek(cursor, dayNum)
-    const tgl = cursor.toISOString().split("T")[0]
-    const hari = slot.day.substring(0, 3)
-    dates.push({
-      tanggal: tgl,
-      hari,
-      jam: `${slot.startTime}-${slot.endTime}`,
-      ruang: slot.roomName,
-    })
-  }
-  return dates
-}
+import { generateJadwal } from "@/lib/jadwal"
 
 export default async function CourseDetailPage({
   params,
