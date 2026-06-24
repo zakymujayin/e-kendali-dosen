@@ -46,6 +46,12 @@ export async function POST(req: Request) {
     })
     const nextMeeting = (latestSessions[0]?.meetingNumber ?? 0) + 1
 
+    if (nextMeeting > slot.course.totalMeeting) {
+      return errorResponse(
+        `Maksimal pertemuan ${slot.course.totalMeeting} sudah tercapai`, 422
+      )
+    }
+
     const newSession = await prisma.lectureSession.create({
       data: {
         teachingLoadId: teachingLoad.id,

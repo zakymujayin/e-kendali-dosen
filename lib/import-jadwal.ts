@@ -351,7 +351,6 @@ export function extractScheduleEntries(
 
 export async function saveScheduleSlots(entries: ScheduleEntry[]): Promise<number> {
   if (entries.length === 0) return 0
-  const { prisma } = await import("./prisma")
 
   await prisma.scheduleSlot.deleteMany({
     where: { semesterId: entries[0].semesterId },

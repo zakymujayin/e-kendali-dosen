@@ -1,14 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Pencil, CheckCircle } from "lucide-react"
+import { Plus, Pencil, CheckCircle, Calendar } from "lucide-react"
 import { SemesterDialog } from "./semester-dialog"
 
 interface SemesterData {
@@ -23,7 +22,6 @@ interface SemesterData {
 }
 
 export function SemesterTable() {
-  const router = useRouter()
   const [semesters, setSemesters] = useState<SemesterData[]>([])
   const [editSemester, setEditSemester] = useState<SemesterData | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -104,7 +102,10 @@ export function SemesterTable() {
             {semesters.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                  Belum ada data semester
+                  <div className="flex flex-col items-center gap-2">
+                    <Calendar className="h-8 w-8 text-muted-foreground/30" />
+                    <span>Belum ada data semester</span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"], display: "swap" })
 
 export const metadata: Metadata = {
   title: "e-Kendali Dosen",
-  description: "Sistem pencatatan realisasi perkuliahan berbasis web",
+  description: "Sistem Kendali Jurnal Mengajar Dosen",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

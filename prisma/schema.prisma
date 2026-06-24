@@ -40,6 +40,7 @@ enum NotificationType {
   DARING_WARNING
   DARING_FULL
   REMINDER_PUBLISH
+  MISSING_JOURNAL
   SYSTEM
 }
 
@@ -75,12 +76,14 @@ model CampusLocation {
 }
 
 model Prodi {
-  id        String   @id @default(cuid())
-  name      String
-  code      String   @unique
-  facultyId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  facultyId   String
+  kaprodiNama String?
+  kaprodiNip  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   faculty       Faculty        @relation(fields: [facultyId], references: [id])
   users         User[]         @relation("ProdiMembers")
@@ -213,6 +216,7 @@ model LectureSession {
   teachingLoad TeachingLoad @relation(fields: [teachingLoadId], references: [id])
   documents    Document[]
 
+  @@unique([teachingLoadId, meetingNumber])
   @@map("lecture_sessions")
 }
 
@@ -240,8 +244,9 @@ model Notification {
   relatedId String?
   createdAt DateTime         @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, isRead])
   @@map("notifications")
 }
 
@@ -275,10 +280,10 @@ model ScheduleSlot {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  semester Semester @relation(fields: [semesterId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
-  course   Course   @relation(fields: [courseId], references: [id])
-  prodi    Prodi    @relation(fields: [prodiId], references: [id])
+  semester Semester @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  prodi    Prodi    @relation(fields: [prodiId], references: [id], onDelete: Cascade)
 
   @@index([userId, day])
   @@index([day, startTime, roomName])

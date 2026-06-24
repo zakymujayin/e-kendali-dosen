@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { successResponse, errorResponse, unauthorized, notFound, forbidden } from "@/lib/api"
+import { successResponse, errorResponse, unauthorized, notFound } from "@/lib/api"
 
 export async function POST(req: Request) {
   try {

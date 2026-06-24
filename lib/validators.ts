@@ -30,14 +30,6 @@ export const sessionSchema = z
   .refine(
     (data) => {
       const isDaring = DARING_METHODS.includes(data.method as any)
-      if (!isDaring && !data.latitude) return false
-      return true
-    },
-    { message: "GPS wajib untuk sesi luring", path: ["latitude"] }
-  )
-  .refine(
-    (data) => {
-      const isDaring = DARING_METHODS.includes(data.method as any)
       if (isDaring && !data.platformUrl) return false
       return true
     },
@@ -69,6 +61,8 @@ export const prodiSchema = z.object({
   name: z.string().min(1, "Nama wajib diisi"),
   code: z.string().min(1, "Kode wajib diisi"),
   facultyId: z.string().min(1, "Fakultas wajib diisi"),
+  kaprodiNama: z.string().optional().nullable(),
+  kaprodiNip: z.string().optional().nullable(),
 })
 
 export const courseSchema = z.object({

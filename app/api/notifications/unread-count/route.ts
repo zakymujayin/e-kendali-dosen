@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { successResponse, unauthorized } from "@/lib/api"
+import { successResponse, unauthorized, errorResponse } from "@/lib/api"
 
 export async function GET() {
   try {
@@ -14,6 +14,6 @@ export async function GET() {
     return successResponse({ count })
   } catch (error) {
     console.error("Unread count error:", error)
-    return unauthorized()
+    return errorResponse("Gagal mengambil jumlah notifikasi", 500)
   }
 }

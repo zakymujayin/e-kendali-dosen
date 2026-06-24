@@ -16,6 +16,7 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  semesters: Array<{ id: string; name: string; year: string; isActive: boolean }>
 }
 
 type Step = "upload" | "dosen" | "course" | "tl" | "result"
@@ -32,12 +33,13 @@ interface StepState {
   errors: string[]
 }
 
-export function ImportJadwalDialog({ open, onOpenChange, onSuccess }: Props) {
+export function ImportJadwalDialog({ open, onOpenChange, onSuccess, semesters }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [step, setStep] = useState<Step>("upload")
   const [file, setFile] = useState<File | null>(null)
   const [state, setState] = useState<StepState>({
-    semesterId: "", semesters: [],
+    semesterId: semesters.find(s => s.isActive)?.id || "",
+    semesters,
     totalRows: 0,
     usersCreated: 0, usersSkipped: 0,
     coursesCreated: 0, coursesSkipped: 0,

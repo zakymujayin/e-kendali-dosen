@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { HelpCircle } from "lucide-react"
 
 interface Props {
@@ -9,13 +9,24 @@ interface Props {
 
 export function HelpTip({ text }: Props) {
   const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("click", handleClick)
+    return () => document.removeEventListener("click", handleClick)
+  }, [open])
 
   return (
-    <span className="relative inline-flex items-center">
+    <span ref={ref} className="relative inline-flex items-center">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        onBlur={() => setOpen(false)}
         className="inline-flex items-center text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring rounded-full"
         aria-label="Bantuan"
       >

@@ -10,6 +10,7 @@ const publicPaths = [
   "/api/auth/login",
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
+  "/api/reminders",
 ]
 
 const roleRedirects: Record<string, string> = {
@@ -23,10 +24,11 @@ export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
   const isAuthApi = pathname.startsWith("/api/auth/")
+  const isPublicApi = pathname.startsWith("/api/reminders/")
   const isApi = pathname.startsWith("/api/")
   const isStatic = pathname.startsWith("/_next") || pathname === "/favicon.ico"
 
-  if (isStatic || isAuthApi) return
+  if (isStatic || isAuthApi || isPublicApi) return
 
   const token = await getToken({ req, secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET })
   const user = token as { role: Role; id: string; prodiId?: string | null } | null

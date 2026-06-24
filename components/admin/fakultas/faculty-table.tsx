@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Pencil, Trash2 } from "lucide-react"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { Plus, Pencil, Trash2, Building2 } from "lucide-react"
 import { FacultyDialog } from "./faculty-dialog"
 
 interface FacultyWithCount {
@@ -26,14 +27,19 @@ export function FacultyTable({ faculties }: Props) {
   const router = useRouter()
   const [editFaculty, setEditFaculty] = useState<FacultyWithCount | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<FacultyWithCount | null>(null)
 
   async function handleDelete(f: FacultyWithCount) {
     if (f._count.prodi > 0) {
       toast.error("Fakultas masih memiliki prodi. Pindahkan atau hapus prodi terlebih dahulu.")
       return
     }
-    if (!confirm(`Hapus fakultas "${f.name}"?`)) return
-    const res = await fetch(`/api/faculties/${f.id}`, { method: "DELETE" })
+    setDeleteTarget(f)
+  }
+
+  async function doDelete() {
+    if (!deleteTarget) return
+    const res = await fetch(`/api/faculties/${deleteTarget.id}`, { method: "DELETE" })
     const data = await res.json()
     if (data.success) {
       toast.success(data.message)
@@ -41,6 +47,7 @@ export function FacultyTable({ faculties }: Props) {
     } else {
       toast.error(data.message)
     }
+    setDeleteTarget(null)
   }
 
   return (
@@ -82,7 +89,10 @@ export function FacultyTable({ faculties }: Props) {
             {faculties.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                  Belum ada data fakultas
+                  <div className="flex flex-col items-center gap-2">
+                    <Building2 className="h-8 w-8 text-muted-foreground/30" />
+                    <span>Belum ada data fakultas</span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -95,6 +105,13 @@ export function FacultyTable({ faculties }: Props) {
         onOpenChange={setDialogOpen}
         faculty={editFaculty}
         onSuccess={() => { setDialogOpen(false); setEditFaculty(null); router.refresh() }}
+      />
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Fakultas"
+        description={`Anda yakin ingin menghapus fakultas "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={doDelete}
       />
     </div>
   )

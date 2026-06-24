@@ -1,20 +1,20 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
-import { Plus, Trash2, AlertTriangle, Upload } from "lucide-react"
+import { Plus, Trash2, AlertTriangle, Upload, ClipboardList } from "lucide-react"
 import { AssignForm } from "./assign-form"
 import { ImportJadwalDialog } from "./import-jadwal-dialog"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface LoadData {
   id: string
@@ -35,12 +35,12 @@ interface Props {
 }
 
 export function LoadTable({ users, courses, semesters }: Props) {
-  const router = useRouter()
   const [data, setData] = useState<LoadData[]>([])
   const [loading, setLoading] = useState(true)
   const [semesterFilter, setSemesterFilter] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<LoadData | null>(null)
 
   useEffect(() => {
     const active = semesters.find((s) => s.isActive)
@@ -80,8 +80,12 @@ export function LoadTable({ users, courses, semesters }: Props) {
   })
 
   async function handleDelete(load: LoadData) {
-    if (!confirm(`Hapus penugasan ${load.course.name} untuk ${load.user.name}?`)) return
-    const res = await fetch(`/api/teaching-loads/${load.id}`, { method: "DELETE" })
+    setDeleteTarget(load)
+  }
+
+  async function doDelete() {
+    if (!deleteTarget) return
+    const res = await fetch(`/api/teaching-loads/${deleteTarget.id}`, { method: "DELETE" })
     const json = await res.json()
     if (json.success) {
       toast.success(json.message)
@@ -89,12 +93,13 @@ export function LoadTable({ users, courses, semesters }: Props) {
     } else {
       toast.error(json.message)
     }
+    setDeleteTarget(null)
   }
 
   return (
     <div className="space-y-4">
       {warnings.length > 0 && (
-        <Card className="border-yellow-300 bg-yellow-50">
+        <Card className="border-yellow-300 bg-yellow-50" role="alert">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 shrink-0" aria-hidden="true" />
@@ -112,6 +117,14 @@ export function LoadTable({ users, courses, semesters }: Props) {
           </CardContent>
         </Card>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Penugasan"
+        description={`Anda yakin ingin menghapus penugasan ${deleteTarget?.course.name} untuk ${deleteTarget?.user.name}?`}
+        onConfirm={doDelete}
+      />
 
       <div className="flex flex-wrap gap-2 items-center">
         <Select value={semesterFilter} onValueChange={(v) => { setSemesterFilter(v) }}>
@@ -150,7 +163,12 @@ export function LoadTable({ users, courses, semesters }: Props) {
             {loading ? (
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Memuat...</TableCell></TableRow>
             ) : data.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Tidak ada data penugasan</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <div className="flex flex-col items-center gap-2">
+                  <ClipboardList className="h-8 w-8 text-muted-foreground/30" />
+                  <span>Tidak ada data penugasan</span>
+                </div>
+              </TableCell></TableRow>
             ) : data.map((load) => (
               <TableRow key={load.id}>
                 <TableCell>
@@ -196,6 +214,7 @@ export function LoadTable({ users, courses, semesters }: Props) {
         open={importOpen}
         onOpenChange={setImportOpen}
         onSuccess={() => { setImportOpen(false); fetchData() }}
+        semesters={semesters}
       />
     </div>
   )

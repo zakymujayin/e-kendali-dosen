@@ -132,8 +132,8 @@ export function SessionForm({
     }
 
     if (!isDaring) {
-      body.latitude = parseFloat(latitude) || null
-      body.longitude = parseFloat(longitude) || null
+      body.latitude = latitude && !isNaN(parseFloat(latitude)) ? parseFloat(latitude) : null
+      body.longitude = longitude && !isNaN(parseFloat(longitude)) ? parseFloat(longitude) : null
       body.gpsAccuracy = parseFloat(values.gpsAccuracy) || null
     }
 

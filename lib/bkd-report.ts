@@ -1,22 +1,23 @@
 import { prisma } from "./prisma"
 import { generateExcel } from "./excel"
-import PdfPrinter from "pdfmake/js/Printer.js"
-import type { TDocumentDefinitions } from "pdfmake/interfaces"
+import { loadLetterheadLogo, letterheadContent } from "@/lib/pdf-letterhead"
+import type { TDocumentDefinitions, BufferOptions } from "pdfmake/interfaces"
+import path from "path"
 import { format } from "date-fns"
+
+// pdfmake CJS/ESM dual-export workaround for Next.js
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const m = require("pdfmake/js/Printer.js")
+const PdfPrinter = m.default?.default || m.default || m
 import { id } from "date-fns/locale"
 
+const RB = path.resolve(process.cwd(), "node_modules/pdfmake/fonts/Roboto")
 const fonts = {
-  Times: {
-    normal: "Times-Roman",
-    bold: "Times-Bold",
-    italics: "Times-Italic",
-    bolditalics: "Times-BoldItalic",
-  },
-  Helvetica: {
-    normal: "Helvetica",
-    bold: "Helvetica-Bold",
-    italics: "Helvetica-Oblique",
-    bolditalics: "Helvetica-BoldOblique",
+  Roboto: {
+    normal: RB + "/Roboto-Regular.ttf",
+    bold: RB + "/Roboto-Medium.ttf",
+    italics: RB + "/Roboto-Italic.ttf",
+    bolditalics: RB + "/Roboto-MediumItalic.ttf",
   },
 }
 
@@ -157,7 +158,9 @@ export async function generateBkdExcel(data: BkdReportData): Promise<Buffer> {
   return generateExcel(rows, "Laporan e-Kendali Dosen")
 }
 
-export async function generateBkdPdf(data: BkdReportData): Promise<Buffer> {
+export async function generateBkdPdf(data: BkdReportData, facultyName: string): Promise<Buffer> {
+  const logoBase64 = await loadLetterheadLogo()
+
   const printer = new PdfPrinter(
     fonts,
     null,
@@ -207,10 +210,12 @@ export async function generateBkdPdf(data: BkdReportData): Promise<Buffer> {
   const docDefinition: TDocumentDefinitions = {
     pageSize: "A4",
     pageOrientation: "landscape",
-    pageMargins: [40, 40, 40, 40],
-    defaultStyle: { font: "Times", fontSize: 9 },
+    pageMargins: [40, 50, 40, 50],
+    defaultStyle: { font: "Roboto", fontSize: 9 },
     content: [
-      { text: "LAPORAN E-KENDALI DOSEN", style: "title", margin: [0, 0, 0, 4] },
+      ...letterheadContent(logoBase64, facultyName),
+
+      { text: "LAPORAN E-KENDALI DOSEN", style: "title", margin: [0, 4, 0, 4] },
       { text: `Semester: ${data.semester?.name || "-"} ${data.semester?.year || ""}`, style: "subtitle", margin: [0, 0, 0, 2] },
       { text: `Tanggal: ${data.reportDate}`, style: "subtitle", margin: [0, 0, 0, 12] },
       {
@@ -218,18 +223,38 @@ export async function generateBkdPdf(data: BkdReportData): Promise<Buffer> {
         layout: "lightHorizontalLines",
         margin: [0, 0, 0, 12],
       },
-      { text: `Ringkasan: ${data.dosen.length} dosen, ${summary.totalMk} MK, ${summary.totalPublished}/${summary.totalTarget} pertemuan`, italics: true, fontSize: 8 },
+      { text: `Ringkasan: ${data.dosen.length} dosen, ${summary.totalMk} MK, ${summary.totalPublished}/${summary.totalTarget} pertemuan`, italics: true, fontSize: 8, margin: [0, 0, 0, 16] },
+
+      { text: "\n" },
+      {
+        columns: [
+          { width: "*", text: "" },
+          {
+            width: "auto",
+            alignment: "left",
+            stack: [
+              { text: "Serang, ____________________", margin: [0, 0, 0, 4] },
+              { text: "Mengetahui,", margin: [0, 0, 0, 4] },
+              { text: "Dekan,", margin: [0, 0, 0, 40] },
+              { text: "(__________________________)" },
+              { text: "NIP. _________________________", margin: [0, 6, 0, 0] },
+            ],
+          },
+        ],
+      },
     ],
     styles: {
-      title: { font: "Helvetica", fontSize: 14, bold: true, alignment: "center" },
-      subtitle: { font: "Helvetica", fontSize: 10, alignment: "center" },
-      tableHeader: { font: "Helvetica", fontSize: 8, bold: true, fillColor: "#f0f0f0" },
+      title: { font: "Roboto", fontSize: 14, bold: true, alignment: "center" },
+      subtitle: { font: "Roboto", fontSize: 10, alignment: "center" },
+      tableHeader: { font: "Roboto", fontSize: 8.5, bold: true, fillColor: "#f0f0f0" },
     },
   }
 
-  const pdfDoc = await printer.createPdfKitDocument(docDefinition)
-  const chunks: Buffer[] = []
+  const options: BufferOptions = {}
+  const pdfDoc = await printer.createPdfKitDocument(docDefinition, options)
+
   return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = []
     pdfDoc.on("data", (chunk: Buffer) => chunks.push(chunk))
     pdfDoc.on("end", () => resolve(Buffer.concat(chunks)))
     pdfDoc.on("error", reject)

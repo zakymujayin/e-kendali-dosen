@@ -23,6 +23,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     return successResponse(null, "Notifikasi dibaca")
   } catch (error) {
     console.error("Mark read error:", error)
-    return unauthorized()
+    return errorResponse("Gagal menandai notifikasi", 500)
   }
 }

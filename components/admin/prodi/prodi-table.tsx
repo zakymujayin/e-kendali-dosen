@@ -7,8 +7,9 @@ import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Pencil, UserCog, Trash2 } from "lucide-react"
+import { Plus, Pencil, UserCog, Trash2, GraduationCap } from "lucide-react"
 import { ProdiDialog } from "./prodi-dialog"
 import { AssignGkmDialog } from "./assign-gkm-dialog"
 
@@ -34,10 +35,15 @@ export function ProdiTable({ prodi, faculties, users }: Props) {
   const [assignProdi, setAssignProdi] = useState<ProdiWithRelations | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [assignOpen, setAssignOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Hapus prodi "${name}"?`)) return
-    const res = await fetch(`/api/prodi/${id}`, { method: "DELETE" })
+    setDeleteTarget({ id, name })
+  }
+
+  async function doDelete() {
+    if (!deleteTarget) return
+    const res = await fetch(`/api/prodi/${deleteTarget.id}`, { method: "DELETE" })
     const data = await res.json()
     if (data.success) {
       toast.success(data.message)
@@ -45,6 +51,7 @@ export function ProdiTable({ prodi, faculties, users }: Props) {
     } else {
       toast.error(data.message)
     }
+    setDeleteTarget(null)
   }
 
   return (
@@ -95,7 +102,10 @@ export function ProdiTable({ prodi, faculties, users }: Props) {
             {prodi.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                  Belum ada data prodi
+                  <div className="flex flex-col items-center gap-2">
+                    <GraduationCap className="h-8 w-8 text-muted-foreground/30" />
+                    <span>Belum ada data prodi</span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -117,6 +127,14 @@ export function ProdiTable({ prodi, faculties, users }: Props) {
         prodi={assignProdi}
         users={users}
         onSuccess={() => { setAssignOpen(false); setAssignProdi(null); router.refresh() }}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Program Studi"
+        description={`Anda yakin ingin menghapus prodi "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={doDelete}
       />
     </div>
   )

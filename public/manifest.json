@@ -1,7 +1,7 @@
 {
   "name": "e-Kendali Dosen",
   "short_name": "eKendali",
-  "description": "Buku Kendali Dosen Elektronik",
+  "description": "Sistem Jurnal Mengajar Dosen Digital",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",

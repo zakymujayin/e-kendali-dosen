@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { successResponseList, unauthorized } from "@/lib/api"
+import { successResponseList, unauthorized, errorResponse } from "@/lib/api"
 
 export async function GET(req: Request) {
   try {
@@ -27,6 +27,6 @@ export async function GET(req: Request) {
     return successResponseList(data, { total, page, limit })
   } catch (error) {
     console.error("Get notifications error:", error)
-    return unauthorized()
+    return errorResponse("Gagal mengambil notifikasi", 500)
   }
 }

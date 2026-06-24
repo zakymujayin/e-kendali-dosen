@@ -45,7 +45,7 @@ export function CourseCard({
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <CardTitle className="text-base leading-snug">{course.name}</CardTitle>
+              <CardTitle className="text-base leading-snug truncate">{course.name}</CardTitle>
               <CardDescription className="mt-0.5 text-xs">
                 {course.code} · {course.sks} SKS
                 {semester && <> · {semester.name} {semester.year}</>}

@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -125,6 +126,7 @@ export function DaftarHadirTable({
   const [publishing, setPublishing] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const data = dataRef.current
   const terisi = data.filter(p => p.tanggal && p.materi).length
@@ -211,7 +213,10 @@ export function DaftarHadirTable({
         const fd = new FormData()
         fd.append("file", photoFile)
         fd.append("sessionId", sid)
-        try { await fetch("/api/documents", { method: "POST", body: fd }) }
+        try {
+          const docRes = await fetch("/api/documents", { method: "POST", body: fd })
+          if (!docRes.ok) throw new Error("Upload failed")
+        }
         catch { toast.error("Foto gagal diunggah, sesi tetap tersimpan") }
         setPhotoFile(null)
       }
@@ -224,7 +229,7 @@ export function DaftarHadirTable({
       if (pj.success) { upd(selected, { status: "PUBLISHED" }); toast.success("Tersimpan & dipublish") }
       else toast.error(pj.message || "Gagal publish")
       setSheetOpen(false)
-    } catch { toast.error("Gagal") }
+    } catch { toast.error("Gagal menyimpan sesi") }
     finally { setSaving(false); setPublishing(false) }
   }
 
@@ -237,13 +242,18 @@ export function DaftarHadirTable({
       const r = await fetch(`/api/sessions/${p.sessionId}/publish`, { method: "PUT" })
       const j = await r.json()
       if (j.success) { upd(selected, { status: "PUBLISHED" }); toast.success("Dipublish"); setSheetOpen(false) }
-      else toast.error(j.message || "Gagal")
-    } catch { toast.error("Gagal") }
+      else toast.error(j.message || "Gagal publish")
+    } catch { toast.error("Gagal mempublish sesi") }
     finally { setPublishing(false) }
   }
 
   async function handleDelete() {
-    if (!selected || !confirm("Hapus pertemuan ini?")) return
+    setShowDeleteConfirm(true)
+  }
+
+  async function doDelete() {
+    if (!selected) return
+    setShowDeleteConfirm(false)
     const p = data.find(x => x.no === selected)!
     if (p.sessionId) {
       try {
@@ -304,7 +314,7 @@ export function DaftarHadirTable({
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="text-sm text-muted-foreground">{terisi}/{totalMeeting} terisi</div>
-          <Progress value={Math.round((terisi / totalMeeting) * 100)} className="w-24 h-2" />
+          <Progress value={totalMeeting > 0 ? Math.round((terisi / totalMeeting) * 100) : 0} className="w-24 h-2" />
           <Button onClick={handleCetak} disabled={downloading} variant="outline" size="sm">
             {downloading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Printer className="h-4 w-4 mr-2" />}
             Cetak
@@ -376,7 +386,7 @@ export function DaftarHadirTable({
                     <button
                       onClick={() => navigate(-1)}
                       disabled={!selected || selected <= 1}
-                      className="p-1 rounded hover:bg-muted disabled:opacity-30"
+                      className="p-1 rounded hover:bg-muted disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       aria-label="Pertemuan sebelumnya"
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -384,7 +394,7 @@ export function DaftarHadirTable({
                     <button
                       onClick={() => navigate(1)}
                       disabled={!selected || selected >= totalMeeting}
-                      className="p-1 rounded hover:bg-muted disabled:opacity-30"
+                      className="p-1 rounded hover:bg-muted disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       aria-label="Pertemuan selanjutnya"
                     >
                       <ChevronRight className="h-4 w-4" />
@@ -485,6 +495,14 @@ export function DaftarHadirTable({
           )}
         </SheetContent>
       </Sheet>
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Hapus Pertemuan"
+        description="Anda yakin ingin menghapus pertemuan ini? Data yang sudah terisi akan hilang."
+        confirmLabel="Hapus"
+        onConfirm={doDelete}
+      />
     </div>
   )
 }

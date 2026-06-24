@@ -190,14 +190,14 @@ export function SessionFormFields({
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="sf-present">Hadir</Label>
           <Input
             id="sf-present"
             type="number"
             min={0}
-            value={values.studentPresent || ""}
+            value={values.studentPresent ?? ""}
             onChange={e => onChange({ studentPresent: parseInt(e.target.value) || 0 })}
           />
         </div>
@@ -207,7 +207,7 @@ export function SessionFormFields({
             id="sf-absent"
             type="number"
             min={0}
-            value={values.studentAbsent || ""}
+            value={values.studentAbsent ?? ""}
             onChange={e => onChange({ studentAbsent: parseInt(e.target.value) || 0 })}
           />
         </div>

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { successResponse, errorResponse, unauthorized, notFound, forbidden } from "@/lib/api"
+import { successResponse, errorResponse, unauthorized, notFound, forbidden, checkDaringQuota } from "@/lib/api"
+import { sendInAppNotification } from "@/lib/notifications"
 
 export async function PUT(
   _req: Request,
@@ -38,6 +39,26 @@ export async function PUT(
         newData: { status: "PUBLISHED", publishedAt: new Date().toISOString() },
       },
     })
+
+    if (updated.isDaring) {
+      const quota = await checkDaringQuota(updated.teachingLoadId)
+      const courseName = updated.teachingLoad.course.name
+      if (quota.remaining === 1) {
+        await sendInAppNotification({
+          userId: session.user.id,
+          title: "Peringatan Kuota Daring",
+          message: `Kuota daring untuk ${courseName} tersisa 1x lagi`,
+          type: "DARING_WARNING",
+        })
+      } else if (quota.remaining === 0) {
+        await sendInAppNotification({
+          userId: session.user.id,
+          title: "Kuota Daring Habis",
+          message: `Kuota daring untuk ${courseName} sudah habis (maks 4x)`,
+          type: "DARING_FULL",
+        })
+      }
+    }
 
     return successResponse(updated, "Sesi berhasil dipublish")
   } catch (error) {

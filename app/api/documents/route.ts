@@ -34,7 +34,9 @@ export async function POST(req: Request) {
 
     // Save file to disk
     const timestamp = Date.now()
-    const safeFilename = `${timestamp}-${file.name}`
+    // Sanitize filename — strip directory separators and path traversal
+    const sanitized = file.name.replace(/[/\\]/g, "_").replace(/\.\./g, "")
+    const safeFilename = `${timestamp}-${sanitized}`
     const uploadDir = join(process.cwd(), "public", "uploads", "documents", sessionId)
     const filePath = join(uploadDir, safeFilename)
 

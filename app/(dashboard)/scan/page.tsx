@@ -6,6 +6,7 @@ import { ScanClient } from "./scan-client"
 export default async function ScanPage() {
   const session = await auth()
   if (!session?.user) redirect("/login?callbackUrl=/scan")
+  if (session.user.role !== "DOSEN") redirect("/dashboard")
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/50">

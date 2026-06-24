@@ -1,12 +1,8 @@
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, GraduationCap, BookOpen, MapPin } from "lucide-react"
 
 export default async function AdminDashboardPage() {
-  const session = await auth()
-  const facultyId = session?.user?.prodiId
-
   const [totalUsers, totalProdi, totalCourses, campusLocation] = await Promise.all([
     prisma.user.count(),
     prisma.prodi.count(),

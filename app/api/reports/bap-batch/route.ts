@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     const teachingLoad = await prisma.teachingLoad.findUnique({
       where: { id: teachingLoadId },
       include: {
-        course: { include: { prodi: true } },
+        course: { include: { prodi: { include: { faculty: true } } } },
         user: { select: { id: true, name: true, nidn: true } },
         semester: true,
       },
@@ -49,13 +49,31 @@ export async function GET(req: Request) {
       notes: s.notes,
     }))
 
+    const allDocs = await prisma.document.findMany({
+      where: {
+        sessionId: { in: publishedSessions.map((s) => s.id) },
+        fileType: { in: ["jpg", "jpeg", "png"] },
+      },
+      select: { name: true, fileUrl: true, fileType: true, sessionId: true },
+    })
+    const photosByMeetingNumber = new Map<number, typeof allDocs>()
+    for (const doc of allDocs) {
+      const sess = publishedSessions.find((s) => s.id === doc.sessionId)
+      if (!sess) continue
+      const arr = photosByMeetingNumber.get(sess.meetingNumber) || []
+      arr.push(doc)
+      photosByMeetingNumber.set(sess.meetingNumber, arr)
+    }
+
     const { generateBapBatchPdf } = await import("@/lib/bap")
     const buffer = await generateBapBatchPdf(
       sessions,
       { code: teachingLoad.course.code, name: teachingLoad.course.name, sks: teachingLoad.course.sks },
       { name: teachingLoad.user.name || "-", nidn: teachingLoad.user.nidn },
       teachingLoad.course.prodi?.name || "-",
-      `${teachingLoad.semester.name} ${teachingLoad.semester.year}`
+      `${teachingLoad.semester.name} ${teachingLoad.semester.year}`,
+      teachingLoad.course.prodi?.faculty?.name || "Fakultas",
+      photosByMeetingNumber
     )
 
     const filename = `BAP_BATCH_${teachingLoad.course.code}.pdf`

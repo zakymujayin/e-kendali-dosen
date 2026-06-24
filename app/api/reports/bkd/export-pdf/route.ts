@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { errorResponse, unauthorized, forbidden } from "@/lib/api"
 import { getBkdReport, generateBkdPdf } from "@/lib/bkd-report"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(req: Request) {
   try {
@@ -19,8 +20,13 @@ export async function GET(req: Request) {
     if (session.user.role === "DOSEN") filters.userId = session.user.id
     if (session.user.role === "GKM" && !prodiId) filters.prodiId = session.user.prodiId ?? undefined
 
+    const targetProdiId = prodiId || (session.user.role === "GKM" ? session.user.prodiId : undefined)
+    const faculty = targetProdiId
+      ? await prisma.faculty.findFirst({ where: { prodi: { some: { id: targetProdiId } } } })
+      : await prisma.faculty.findFirst()
+
     const data = await getBkdReport(filters)
-    const buffer = await generateBkdPdf(data)
+    const buffer = await generateBkdPdf(data, faculty?.name || "Fakultas")
 
     const filename = `Laporan_E-Kendali_Dosen_${data.semester?.name || "semester"}_${data.semester?.year || ""}.pdf`.replace(/\s+/g, "_")
 

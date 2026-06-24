@@ -1,18 +1,18 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
-import { Plus, Pencil, Trash2, Upload, Search } from "lucide-react"
+import { Plus, Pencil, Trash2, Upload, Search, BookMarked } from "lucide-react"
 import { CourseDialog } from "./course-dialog"
 import { ImportDialog } from "./import-dialog"
 
@@ -35,7 +35,6 @@ interface Props {
 }
 
 export function CourseTable({ prodiList, semesters }: Props) {
-  const router = useRouter()
   const [data, setData] = useState<CourseData[]>([])
   const [loading, setLoading] = useState(true)
   const [prodiFilter, setProdiFilter] = useState("")
@@ -44,6 +43,7 @@ export function CourseTable({ prodiList, semesters }: Props) {
   const [editCourse, setEditCourse] = useState<CourseData | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<CourseData | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -62,8 +62,12 @@ export function CourseTable({ prodiList, semesters }: Props) {
   useEffect(() => { fetchData() }, [fetchData])
 
   async function handleDelete(course: CourseData) {
-    if (!confirm(`Hapus MK "${course.name}"?`)) return
-    const res = await fetch(`/api/courses/${course.id}`, { method: "DELETE" })
+    setDeleteTarget(course)
+  }
+
+  async function doDelete() {
+    if (!deleteTarget) return
+    const res = await fetch(`/api/courses/${deleteTarget.id}`, { method: "DELETE" })
     const json = await res.json()
     if (json.success) {
       toast.success(json.message)
@@ -71,6 +75,7 @@ export function CourseTable({ prodiList, semesters }: Props) {
     } else {
       toast.error(json.message)
     }
+    setDeleteTarget(null)
   }
 
   return (
@@ -130,7 +135,12 @@ export function CourseTable({ prodiList, semesters }: Props) {
             {loading ? (
               <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Memuat...</TableCell></TableRow>
             ) : data.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Tidak ada data MK</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <div className="flex flex-col items-center gap-2">
+                  <BookMarked className="h-8 w-8 text-muted-foreground/30" />
+                  <span>Tidak ada data MK</span>
+                </div>
+              </TableCell></TableRow>
             ) : data.map((course) => (
               <TableRow key={course.id}>
                 <TableCell className="font-medium">{course.code}</TableCell>
@@ -169,6 +179,13 @@ export function CourseTable({ prodiList, semesters }: Props) {
         open={importOpen}
         onOpenChange={setImportOpen}
         onSuccess={() => { setImportOpen(false); fetchData() }}
+      />
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Mata Kuliah"
+        description={`Anda yakin ingin menghapus MK "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={doDelete}
       />
     </div>
   )

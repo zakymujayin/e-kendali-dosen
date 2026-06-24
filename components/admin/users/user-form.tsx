@@ -110,7 +110,7 @@ export function UserForm({ mode, userId, faculties, prodiList }: Props) {
         <CardHeader><CardTitle>Data User</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nama *</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />

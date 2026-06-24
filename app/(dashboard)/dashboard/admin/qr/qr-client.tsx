@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Printer, Download } from "lucide-react"
@@ -46,7 +47,7 @@ export function QrGeneratorClient({ scanUrl }: Props) {
         <CardContent className="py-8 text-center space-y-4">
           {qrDataUrl ? (
             <>
-              <img src={qrDataUrl} alt="QR Code Scan" className="w-48 h-48 mx-auto" />
+              <Image src={qrDataUrl} alt="QR Code Scan" width={192} height={192} className="mx-auto" />
               <p className="text-sm text-muted-foreground break-all">{scanUrl}</p>
             </>
           ) : (

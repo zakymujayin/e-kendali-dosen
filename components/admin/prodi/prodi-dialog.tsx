@@ -15,7 +15,7 @@ import {
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  prodi?: { id: string; name: string; code: string; facultyId: string } | null
+  prodi?: { id: string; name: string; code: string; facultyId: string; kaprodiNama?: string | null; kaprodiNip?: string | null } | null
   faculties: { id: string; name: string; code: string }[]
   onSuccess: () => void
 }
@@ -24,6 +24,8 @@ export function ProdiDialog({ open, onOpenChange, prodi, faculties, onSuccess }:
   const [name, setName] = useState("")
   const [code, setCode] = useState("")
   const [facultyId, setFacultyId] = useState("")
+  const [kaprodiNama, setKaprodiNama] = useState("")
+  const [kaprodiNip, setKaprodiNip] = useState("")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export function ProdiDialog({ open, onOpenChange, prodi, faculties, onSuccess }:
       setName(prodi?.name || "")
       setCode(prodi?.code || "")
       setFacultyId(prodi?.facultyId || "")
+      setKaprodiNama(prodi?.kaprodiNama || "")
+      setKaprodiNip(prodi?.kaprodiNip || "")
     }
   }, [open, prodi])
 
@@ -44,7 +48,7 @@ export function ProdiDialog({ open, onOpenChange, prodi, faculties, onSuccess }:
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, code, facultyId }),
+      body: JSON.stringify({ name, code, facultyId, kaprodiNama: kaprodiNama || null, kaprodiNip: kaprodiNip || null }),
     })
     const data = await res.json()
 
@@ -85,6 +89,14 @@ export function ProdiDialog({ open, onOpenChange, prodi, faculties, onSuccess }:
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="kaprodiNama">Nama Kaprodi</Label>
+            <Input id="kaprodiNama" value={kaprodiNama} onChange={(e) => setKaprodiNama(e.target.value)} placeholder="Nama Ketua Program Studi" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="kaprodiNip">NIP Kaprodi</Label>
+            <Input id="kaprodiNip" value={kaprodiNip} onChange={(e) => setKaprodiNip(e.target.value)} placeholder="NIP Ketua Program Studi" />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Batal</Button>

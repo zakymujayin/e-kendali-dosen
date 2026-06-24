@@ -2,6 +2,7 @@ import type { TDocumentDefinitions, BufferOptions } from "pdfmake/interfaces"
 import path from "path"
 import { MAX_DARING } from "@/lib/constants"
 import { loadLetterheadLogo, letterheadContent } from "@/lib/pdf-letterhead"
+import { buildPhotoLampiran, type PhotoFile } from "@/lib/pdf-photo-lampiran"
 
 // pdfmake CJS/ESM dual-export workaround for Next.js
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -19,8 +20,7 @@ const fonts = {
 }
 
 export interface JurnalData {
-  kopInstitusi: string
-  kopSubtitle: string
+  facultyName: string
   namaDosen: string
   nidn: string
   prodi: string
@@ -37,6 +37,7 @@ export interface JurnalData {
     materi: string
     metode: string
   }[]
+  photos: PhotoFile[]
 }
 
 export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
@@ -82,10 +83,10 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
   const docDefinition: TDocumentDefinitions = {
     pageSize: "A4",
     pageOrientation: "portrait",
-    pageMargins: [40, 50, 40, 40],
-    defaultStyle: { font: "Roboto", fontSize: 10 },
+    pageMargins: [40, 50, 40, 50],
+    defaultStyle: { font: "Roboto", fontSize: 9 },
     content: [
-      ...letterheadContent(logoBase64),
+      ...letterheadContent(logoBase64, data.facultyName),
 
       { text: "DAFTAR HADIR DOSEN", style: "title", margin: [0, 0, 0, 10] },
 
@@ -166,6 +167,8 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
         margin: [0, 0, 0, 8],
       },
 
+      ...buildPhotoLampiran(data.photos),
+
       { text: "\n" },
 
       {
@@ -194,9 +197,14 @@ export async function generateJurnalPdf(data: JurnalData): Promise<Buffer> {
         alignment: "center",
         decoration: "underline",
       },
+      section: {
+        font: "Roboto",
+        fontSize: 10,
+        bold: true,
+      },
       tableHeader: {
         font: "Roboto",
-        fontSize: 9,
+        fontSize: 8,
         bold: true,
         fillColor: "#f0f0f0",
       },

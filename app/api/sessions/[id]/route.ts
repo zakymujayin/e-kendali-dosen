@@ -28,6 +28,12 @@ export async function GET(
     })
     if (!data) return notFound()
 
+    const isOwner = data.teachingLoad.user.id === session.user.id
+    const isAdmin = ["ADMIN", "GKM", "DEKANAT"].includes(session.user.role)
+    if (!isOwner && !isAdmin) {
+      return forbidden()
+    }
+
     return successResponse(data)
   } catch (error) {
     console.error("Get session error:", error)
@@ -60,7 +66,7 @@ export async function PUT(
       return errorResponse(firstError as string, 422)
     }
 
-    const { teachingLoadId, method, latitude, longitude, platformUrl } = parsed.data
+    const { teachingLoadId, method, platformUrl } = parsed.data
 
     const load = await prisma.teachingLoad.findUnique({
       where: { id: teachingLoadId },
@@ -79,45 +85,8 @@ export async function PUT(
     }
 
     if (!isDaring) {
-      if (!latitude || !longitude) {
-        return errorResponse("GPS wajib untuk sesi luring", 422)
-      }
-
-      const userWithFaculty = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { prodi: { select: { facultyId: true } } },
-      })
-      const facultyId = userWithFaculty?.prodi?.facultyId
-      if (!facultyId) {
-        return errorResponse("User tidak terdaftar pada fakultas", 422)
-      }
-
-      const campuses = await prisma.campusLocation.findMany({
-        where: { facultyId, isActive: true },
-      })
-      if (campuses.length === 0) {
-        return errorResponse("Lokasi kampus belum diatur untuk fakultas Anda", 422)
-      }
-
-      const { hitungJarakMeter } = await import("@/lib/gps")
-      let minJarak = Infinity
-      let nearestCampus = campuses[0]
-      for (const campus of campuses) {
-        const jarak = hitungJarakMeter(latitude, longitude, campus.latitude, campus.longitude)
-        if (jarak < minJarak) {
-          minJarak = jarak
-          nearestCampus = campus
-        }
-      }
-
-      updateData.distanceMeters = Math.round(minJarak * 10) / 10
-      updateData.isGpsValid = minJarak <= nearestCampus.radiusMeters
       updateData.isDaring = false
       updateData.platformUrl = null
-
-      if (!updateData.isGpsValid) {
-        return errorResponse(`Lokasi Anda di luar area kampus terdekat (jarak ${Math.round(minJarak)}m > ${nearestCampus.radiusMeters}m)`, 422)
-      }
     }
 
     if (isDaring) {
@@ -155,7 +124,10 @@ export async function PUT(
     })
 
     return successResponse(updated, "Sesi berhasil diupdate")
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return errorResponse("Nomor pertemuan sudah ada untuk MK ini", 409)
+    }
     console.error("Update session error:", error)
     return errorResponse("Server error", 500)
   }

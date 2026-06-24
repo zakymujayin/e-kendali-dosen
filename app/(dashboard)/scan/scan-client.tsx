@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Clock, MapPin, BookOpen, Calendar, Play, Loader2, GraduationCap, Rocket, Pencil } from "lucide-react"
+import { Clock, MapPin, BookOpen, Calendar, Play, Loader2, GraduationCap, Rocket, Pencil, Camera, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 
 interface Props {
@@ -58,16 +58,19 @@ export function ScanClient({ userName, role }: Props) {
   const methodParam = viaQr ? "&method=TATAP_MUKA" : ""
   const [data, setData] = useState<MatchData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState("")
   const [quickStarting, setQuickStarting] = useState(false)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
 
   useEffect(() => {
     fetch("/api/schedules/smart-match")
       .then((r) => r.json())
       .then((j) => {
         if (j.success) setData(j.data)
+        else setFetchError(true)
       })
-      .catch(console.error)
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false))
   }, [])
 
@@ -81,8 +84,21 @@ export function ScanClient({ userName, role }: Props) {
       })
       const json = await res.json()
       if (json.success) {
+        const sessionId = json.data.sessionId
+
+        if (photoFile) {
+          const fd = new FormData()
+          fd.append("file", photoFile)
+          fd.append("sessionId", sessionId)
+          try {
+            const docRes = await fetch("/api/documents", { method: "POST", body: fd })
+            if (!docRes.ok) throw new Error("Upload failed")
+          }
+          catch { toast.error("Foto gagal diunggah, sesi tetap tersimpan") }
+        }
+
         toast.success("Sesi dimulai")
-        router.push(`/dashboard/dosen/courses/${courseId}/sessions/${json.data.sessionId}`)
+        router.push(`/dashboard/dosen/courses/${courseId}/sessions/${sessionId}`)
       } else {
         toast.error(json.message || "Gagal memulai sesi")
       }
@@ -111,6 +127,17 @@ export function ScanClient({ userName, role }: Props) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-12 text-center">
+        <AlertCircle className="h-16 w-16 mx-auto text-destructive mb-4" />
+        <h1 className="text-xl font-bold mb-2">Gagal Memuat Jadwal</h1>
+        <p className="text-muted-foreground mb-6">Terjadi kesalahan saat mengambil jadwal. Periksa koneksi dan coba lagi.</p>
+        <Button onClick={() => { setFetchError(false); setLoading(true); window.location.reload() }}>Coba Lagi</Button>
       </div>
     )
   }
@@ -160,6 +187,36 @@ export function ScanClient({ userName, role }: Props) {
               <MapPin className="h-4 w-4" />
               {data.active.roomName} · Kelas {data.active.className}
             </div>
+
+            {!photoFile ? (
+              <label
+                htmlFor="scan-photo"
+                className="flex items-center gap-2 justify-center w-full py-3 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/40 cursor-pointer transition-colors text-sm text-muted-foreground hover:text-primary"
+              >
+                <Camera className="h-5 w-5" />
+                Ambil foto bukti kehadiran (opsional)
+                <input
+                  id="scan-photo"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={e => setPhotoFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            ) : (
+              <div className="flex items-center gap-2 text-sm bg-green-50 text-green-800 rounded-lg p-2.5 border border-green-200">
+                <Camera className="h-4 w-4 shrink-0" />
+                <span className="truncate">{photoFile.name}</span>
+                <button
+                  className="ml-auto text-xs text-muted-foreground hover:text-destructive shrink-0"
+                  onClick={() => setPhotoFile(null)}
+                >
+                  Hapus
+                </button>
+              </div>
+            )}
+
             <Button
               className="w-full text-base h-12"
               onClick={() => quickStart(data.active!.id, data.active!.courseId)}

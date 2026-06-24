@@ -13,7 +13,7 @@ export async function loadLetterheadLogo(): Promise<string | null> {
 // Kop surat resmi (dipakai bersama oleh jurnal mengajar & BAP).
 // Self-contained: tiap node memakai style inline agar tak bergantung pada styles dokumen pemanggil.
 // Disetel untuk pageMargins kiri/kanan 40 (lebar konten ~515pt).
-export function letterheadContent(logoBase64: string | null): Record<string, unknown>[] {
+export function letterheadContent(logoBase64: string | null, facultyName: string): Record<string, unknown>[] {
   return [
     ...(logoBase64
       ? [{ image: logoBase64, width: 50, absolutePosition: { x: 90, y: 52 } }]
@@ -21,11 +21,11 @@ export function letterheadContent(logoBase64: string | null): Record<string, unk
     { text: "KEMENTERIAN AGAMA REPUBLIK INDONESIA", fontSize: 11, bold: true, alignment: "center" },
     { text: "UNIVERSITAS ISLAM NEGERI", fontSize: 10, bold: true, alignment: "center" },
     { text: "SULTAN MAULANA HASANUDDIN BANTEN", fontSize: 10, bold: true, alignment: "center" },
-    { text: "FAKULTAS USHULUDDIN DAN ADAB", fontSize: 12, bold: true, alignment: "center" },
+    { text: facultyName.toUpperCase(), fontSize: 12, bold: true, alignment: "center" },
     { text: "Jl. Syekh Nawawi Al Bantani Kp Andamui Sukawana Curug Kota Serang Banten 42171", fontSize: 8, italics: true, alignment: "center" },
     { text: "Telp (0254) 200323-208849  Fax (0254) 200022", fontSize: 8, italics: true, alignment: "center" },
     { text: "Website: www.fuda.uinbanten.ac.id  E-mail: surat@uinbanten.ac.id", fontSize: 8, italics: true, alignment: "center" },
-    { canvas: [{ type: "line", x1: 0, y1: 0, x2: 495, y2: 0, lineWidth: 3 }], margin: [0, 2, 0, 1] },
-    { canvas: [{ type: "line", x1: 0, y1: 0, x2: 495, y2: 0, lineWidth: 1 }], margin: [0, 0, 0, 12] },
+    { canvas: [{ type: "line", x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 3 }], margin: [0, 2, 0, 1] },
+    { canvas: [{ type: "line", x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1 }], margin: [0, 0, 0, 12] },
   ]
 }

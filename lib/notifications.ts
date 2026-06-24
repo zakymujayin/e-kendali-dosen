@@ -67,11 +67,31 @@ export async function notifyDaringFull(userId: string, courseName: string) {
   })
 }
 
-export async function notifyReminderPublish(userId: string, sessionCount: number) {
-  return sendInAppNotification({
+export async function notifyMissingJournal(
+  userId: string,
+  email: string,
+  dosenName: string,
+  courseName: string,
+  courseCode: string,
+  overdueCount: number,
+) {
+  const msg = `MK ${courseName} (${courseCode}): ${overdueCount} pertemuan sudah lewat 3 hari dan jurnal belum diisi.`
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3002"
+
+  await sendInAppNotification({
     userId,
-    title: "Pengingat Publish",
-    message: `Anda memiliki ${sessionCount} sesi DRAFT yang belum dipublish > 7 hari`,
-    type: "REMINDER_PUBLISH",
+    title: "Jurnal Belum Diisi",
+    message: msg,
+    type: "MISSING_JOURNAL",
+  })
+
+  await sendEmailNotification({
+    to: email,
+    subject: `[e-Kendali] Jurnal Belum Diisi — ${courseName}`,
+    html: `<p>Yth. ${dosenName},</p>
+<p>${msg}</p>
+<p>Silakan segera mengisi jurnal mengajar Anda melalui:</p>
+<p><a href="${baseUrl}/dashboard/dosen/courses">${baseUrl}/dashboard/dosen/courses</a></p>
+<p>Salam,<br/>Tim Akademik</p>`,
   })
 }

@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest"
-import ExcelJS from "exceljs"
 import { generateExcel, parseExcel, generateTemplateExcel } from "@/lib/excel"
 
 describe("generateExcel", () => {

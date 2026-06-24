@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { sendEmailNotification } from "@/lib/notifications"
 import { NextResponse } from "next/server"
 import crypto from "crypto"
 
@@ -32,7 +33,21 @@ export async function POST(req: Request) {
       },
     })
 
-    console.log(`[DEV] Reset token for ${email}: ${token}`)
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[DEV] Reset token for ${email}: ${token}`)
+    }
+
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3002"
+    const resetLink = `${baseUrl}/reset-password?token=${token}`
+    await sendEmailNotification({
+      to: user.email,
+      subject: "Reset Password e-Kendali Dosen",
+      html: `<p>Anda meminta reset password untuk akun e-Kendali Dosen.</p>
+<p>Klik tautan berikut untuk reset password Anda:</p>
+<p><a href="${resetLink}">${resetLink}</a></p>
+<p>Tautan ini berlaku selama 1 jam.</p>
+<p>Jika Anda tidak meminta reset password, abaikan email ini.</p>`,
+    })
 
     return NextResponse.json(
       { success: true, message: "Tautan reset telah dikirim ke email Anda" },

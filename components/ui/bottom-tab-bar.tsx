@@ -3,18 +3,24 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { QrCode, LayoutDashboard, BookOpen } from "lucide-react"
+import type { Role } from "@prisma/client"
 
-const tabs = [
-  { label: "Scan", href: "/scan", icon: QrCode },
-  { label: "Beranda", href: "/dashboard/dosen", icon: LayoutDashboard },
-  { label: "MK Saya", href: "/dashboard/dosen/courses", icon: BookOpen },
-]
+const tabsByRole: Record<string, Array<{ label: string; href: string; icon: typeof QrCode }>> = {
+  DOSEN: [
+    { label: "Scan", href: "/scan", icon: QrCode },
+    { label: "Beranda", href: "/dashboard/dosen", icon: LayoutDashboard },
+    { label: "MK Saya", href: "/dashboard/dosen/courses", icon: BookOpen },
+  ],
+}
 
-export function BottomTabBar() {
+export function BottomTabBar({ role }: { role: Role }) {
   const pathname = usePathname()
+  const tabs = tabsByRole[role]
+
+  if (!tabs || tabs.length === 0) return null
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 h-16 border-t bg-background lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 h-16 border-t bg-background lg:hidden" aria-label="Navigasi utama">
       <div className="mx-auto flex h-full max-w-lg items-center">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/")

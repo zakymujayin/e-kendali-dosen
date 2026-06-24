@@ -4,13 +4,14 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select"
 import {
-  Card, CardHeader, CardTitle, CardContent,
+  Card, CardContent,
 } from "@/components/ui/card"
 import {
   Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle,
@@ -93,6 +94,7 @@ function LocationEditor({
       map.remove()
       mapInstanceRef.current = null
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -162,7 +164,7 @@ function LocationEditor({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="edit-facultyId">Fakultas</Label>
           <Select value={selectedFacultyId} onValueChange={setSelectedFacultyId} disabled={!!location}>
@@ -215,14 +217,19 @@ export function CampusManager({ locations, faculties }: Props) {
   const router = useRouter()
   const [selectedFacultyId, setSelectedFacultyId] = useState<string>("__all__")
   const [editTarget, setEditTarget] = useState<CampusLocation | null | "new">(null)
+  const [deleteTarget, setDeleteTarget] = useState<CampusLocation | null>(null)
 
   const filteredLocations = locations.filter((l) =>
     selectedFacultyId === "__all__" || l.facultyId === selectedFacultyId
   )
 
   async function handleDelete(loc: CampusLocation) {
-    if (!confirm(`Hapus lokasi "${loc.label || loc.latitude + ", " + loc.longitude}"?`)) return
-    const res = await fetch(`/api/campus/location/${loc.id}`, { method: "DELETE" })
+    setDeleteTarget(loc)
+  }
+
+  async function doDelete() {
+    if (!deleteTarget) return
+    const res = await fetch(`/api/campus/location/${deleteTarget.id}`, { method: "DELETE" })
     const data = await res.json()
     if (data.success) {
       toast.success("Lokasi berhasil dihapus")
@@ -230,6 +237,7 @@ export function CampusManager({ locations, faculties }: Props) {
     } else {
       toast.error(data.message || "Gagal menghapus")
     }
+    setDeleteTarget(null)
   }
 
   return (
@@ -314,6 +322,13 @@ export function CampusManager({ locations, faculties }: Props) {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus Lokasi Kampus"
+        description={`Anda yakin ingin menghapus lokasi "${deleteTarget?.label || "Tanpa Label"}"?`}
+        onConfirm={doDelete}
+      />
     </div>
   )
 }

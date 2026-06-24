@@ -2,6 +2,16 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { DashboardLayoutClient } from "./layout-client"
+import type { Role } from "@prisma/client"
+
+interface UserData {
+  id: string
+  name?: string | null
+  email?: string | null
+  role: Role
+  prodiId?: string | null
+  image?: string | null
+}
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -18,7 +28,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   }) : 0
 
   return (
-    <DashboardLayoutClient user={session.user as any} draftCount={draftCount}>
+    <DashboardLayoutClient user={session.user as UserData} draftCount={draftCount}>
       {children}
     </DashboardLayoutClient>
   )

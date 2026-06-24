@@ -34,11 +34,15 @@ export async function GET(
       return errorResponse("BAP hanya bisa diunduh untuk sesi yang sudah dipublish", 400)
     }
 
+    const documents = await prisma.document.findMany({
+      where: { sessionId: id, fileType: { in: ["jpg", "jpeg", "png"] } },
+      select: { name: true, fileUrl: true, fileType: true },
+    })
+
     const tl = lectureSession.teachingLoad
 
     const pdfBuffer = await generateBapPdf({
-      universityName: "Universitas",
-      facultyName: tl.course.prodi?.faculty?.name || undefined,
+      facultyName: tl.course.prodi?.faculty?.name || "Fakultas",
       prodiName: tl.course.prodi?.name || "-",
       courseCode: tl.course.code,
       courseName: tl.course.name,
@@ -62,6 +66,7 @@ export async function GET(
       studentAbsent: lectureSession.studentAbsent,
       studentTotal: lectureSession.studentTotal,
       notes: lectureSession.notes,
+      photos: documents,
     })
 
     await prisma.lectureSession.update({

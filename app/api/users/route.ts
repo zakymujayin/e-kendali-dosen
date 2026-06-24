@@ -93,8 +93,11 @@ export async function POST(req: Request) {
     })
 
     return successResponse(data, "User berhasil dibuat")
-  } catch (error) {
-    console.error("Create user error:", error)
-    return errorResponse("Server error", 500)
+      } catch (error: any) {
+        if (error?.code === "P2002") {
+          return errorResponse("Username atau email sudah digunakan", 409)
+        }
+        console.error("Create user error:", error)
+        return errorResponse("Server error", 500)
   }
 }

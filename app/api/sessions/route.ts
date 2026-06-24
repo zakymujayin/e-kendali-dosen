@@ -94,14 +94,18 @@ export async function POST(req: Request) {
       return errorResponse(firstError as string, 422)
     }
 
-    const { teachingLoadId, method, latitude, longitude, platformUrl } = parsed.data
+    const { teachingLoadId, method, platformUrl } = parsed.data
 
     const load = await prisma.teachingLoad.findUnique({
       where: { id: teachingLoadId },
-      include: { course: { select: { name: true } } },
+      include: { course: { select: { name: true, totalMeeting: true } } },
     })
     if (!load) return notFound("Teaching load tidak ditemukan")
     if (load.userId !== session.user.id) return forbidden()
+
+    if (parsed.data.meetingNumber > load.course.totalMeeting) {
+      return errorResponse(`Maksimal pertemuan adalah ${load.course.totalMeeting}`, 422)
+    }
 
     const isDaring = isDaringMethod(method)
     const studentTotal = parsed.data.studentPresent + parsed.data.studentAbsent
@@ -114,43 +118,7 @@ export async function POST(req: Request) {
     }
 
     if (!isDaring) {
-      if (!latitude || !longitude) {
-        return errorResponse("GPS wajib untuk sesi luring", 422)
-      }
-
-      const userWithFaculty = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { prodi: { select: { facultyId: true } } },
-      })
-      const facultyId = userWithFaculty?.prodi?.facultyId
-      if (!facultyId) {
-        return errorResponse("User tidak terdaftar pada fakultas", 422)
-      }
-
-      const campuses = await prisma.campusLocation.findMany({
-        where: { facultyId, isActive: true },
-      })
-      if (campuses.length === 0) {
-        return errorResponse("Lokasi kampus belum diatur untuk fakultas Anda", 422)
-      }
-
-      const { hitungJarakMeter } = await import("@/lib/gps")
-      let minJarak = Infinity
-      let nearestCampus = campuses[0]
-      for (const campus of campuses) {
-        const jarak = hitungJarakMeter(latitude, longitude, campus.latitude, campus.longitude)
-        if (jarak < minJarak) {
-          minJarak = jarak
-          nearestCampus = campus
-        }
-      }
-
-      createData.distanceMeters = Math.round(minJarak * 10) / 10
-      createData.isGpsValid = minJarak <= nearestCampus.radiusMeters
-
-      if (!createData.isGpsValid) {
-        return errorResponse(`Lokasi Anda di luar area kampus terdekat (jarak ${Math.round(minJarak)}m > ${nearestCampus.radiusMeters}m)`, 422)
-      }
+      createData.isGpsValid = true
     }
 
     if (isDaring) {
@@ -205,7 +173,10 @@ export async function POST(req: Request) {
     }
 
     return successResponse(lectureSession, "Sesi perkuliahan berhasil dibuat")
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return errorResponse("Nomor pertemuan sudah ada untuk MK ini", 409)
+    }
     console.error("Create session error:", error)
     return errorResponse("Server error", 500)
   }

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin, Globe, Save } from "lucide-react"
+import { MapPin, Globe, Save, Camera } from "lucide-react"
 import { METHOD_LABELS } from "@/lib/constants"
 import { isValidUrl } from "@/lib/validators"
 
@@ -42,6 +42,7 @@ export function QuickStartForm({
   const [notes, setNotes] = useState("")
   const [platformUrl, setPlatformUrl] = useState("")
   const [publish, setPublish] = useState(false)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
 
   const [submitting, setSubmitting] = useState(false)
 
@@ -90,6 +91,14 @@ export function QuickStartForm({
 
       const sessionId = json.data.id
 
+      if (photoFile) {
+        const fd = new FormData()
+        fd.append("file", photoFile)
+        fd.append("sessionId", sessionId)
+        try { await fetch("/api/documents", { method: "POST", body: fd }) }
+        catch { toast.error("Foto gagal diunggah, sesi tetap tersimpan") }
+      }
+
       if (publish) {
         await fetch(`/api/sessions/${sessionId}/publish`, { method: "POST" })
       }
@@ -119,7 +128,7 @@ export function QuickStartForm({
             <Label>Tanggal</Label>
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Jam Mulai</Label>
               <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
@@ -179,6 +188,39 @@ export function QuickStartForm({
                 onChange={(e) => setPlatformUrl(e.target.value)}
                 placeholder="https://meet.google.com/xxx"
               />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          {!photoFile ? (
+            <label
+              htmlFor="qs-photo"
+              className="flex items-center gap-2 justify-center w-full py-4 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/40 cursor-pointer transition-colors text-sm text-muted-foreground hover:text-primary"
+            >
+              <Camera className="h-5 w-5" />
+              Ambil foto bukti kehadiran (opsional)
+              <input
+                id="qs-photo"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={e => setPhotoFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          ) : (
+            <div className="flex items-center gap-2 text-sm bg-green-50 text-green-800 rounded-lg p-3 border border-green-200">
+              <Camera className="h-4 w-4 shrink-0" />
+              <span className="truncate">{photoFile.name}</span>
+              <button
+                className="ml-auto text-xs text-muted-foreground hover:text-destructive shrink-0"
+                onClick={() => setPhotoFile(null)}
+              >
+                Hapus
+              </button>
             </div>
           )}
         </CardContent>

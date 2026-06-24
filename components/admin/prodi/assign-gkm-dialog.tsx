@@ -79,9 +79,9 @@ export function AssignGkmDialog({ open, onOpenChange, prodi, users, onSuccess }:
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Pilih Dosen (GKM)</label>
+            <label className="text-sm font-medium" htmlFor="gkm-select">Pilih Dosen (GKM)</label>
             <Select value={userId} onValueChange={setUserId}>
-              <SelectTrigger><SelectValue placeholder="Pilih dosen..." /></SelectTrigger>
+              <SelectTrigger id="gkm-select"><SelectValue placeholder="Pilih dosen..." /></SelectTrigger>
               <SelectContent>
                 {filteredUsers.map((u) => (
                   <SelectItem key={u.id} value={u.id}>

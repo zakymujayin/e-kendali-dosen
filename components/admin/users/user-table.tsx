@@ -7,12 +7,13 @@ import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 } from "@/components/ui/select"
-import { Plus, Pencil, Trash2, Download, Upload, Search, Power, PowerOff } from "lucide-react"
+import { Plus, Pencil, Trash2, Download, Upload, Search, Power, PowerOff, Users } from "lucide-react"
 import { ROLE_LABELS } from "@/lib/constants"
 import { ImportDialog } from "./import-dialog"
 
@@ -35,7 +36,7 @@ interface Props {
   faculties: { id: string; name: string }[]
 }
 
-export function UserTable({ faculties }: Props) {
+export function UserTable({ faculties: _faculties }: Props) {
   const router = useRouter()
   const [data, setData] = useState<UserData[]>([])
   const [total, setTotal] = useState(0)
@@ -45,6 +46,7 @@ export function UserTable({ faculties }: Props) {
   const [roleFilter, setRoleFilter] = useState("")
   const [search, setSearch] = useState("")
   const [importOpen, setImportOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -76,8 +78,12 @@ export function UserTable({ faculties }: Props) {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Hapus user "${name}"?`)) return
-    const res = await fetch(`/api/users/${id}`, { method: "DELETE" })
+    setDeleteTarget({ id, name })
+  }
+
+  async function doDelete() {
+    if (!deleteTarget) return
+    const res = await fetch(`/api/users/${deleteTarget.id}`, { method: "DELETE" })
     const json = await res.json()
     if (json.success) {
       toast.success(json.message)
@@ -85,6 +91,7 @@ export function UserTable({ faculties }: Props) {
     } else {
       toast.error(json.message)
     }
+    setDeleteTarget(null)
   }
 
   const totalPages = Math.ceil(total / limit)
@@ -140,7 +147,12 @@ export function UserTable({ faculties }: Props) {
             {loading ? (
               <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Memuat...</TableCell></TableRow>
             ) : data.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Tidak ada data user</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <div className="flex flex-col items-center gap-2">
+                  <Users className="h-8 w-8 text-muted-foreground/30" />
+                  <span>Tidak ada data user</span>
+                </div>
+              </TableCell></TableRow>
             ) : data.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.name}</TableCell>
@@ -190,6 +202,13 @@ export function UserTable({ faculties }: Props) {
         </div>
       )}
 
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Hapus User"
+        description={`Anda yakin ingin menghapus user "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={doDelete}
+      />
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} onSuccess={() => { setImportOpen(false); fetchData() }} />
     </div>
   )

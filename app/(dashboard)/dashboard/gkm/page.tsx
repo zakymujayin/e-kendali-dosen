@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, BookOpen, Clock, Eye } from "lucide-react"
+import { Users, BookOpen, Clock } from "lucide-react"
 
 export default async function GKMDashboardPage() {
   const session = await auth()

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { successResponse, unauthorized } from "@/lib/api"
+import { successResponse, unauthorized, errorResponse } from "@/lib/api"
 
 export async function PUT() {
   try {
@@ -15,6 +15,6 @@ export async function PUT() {
     return successResponse(null, "Semua notifikasi sudah dibaca")
   } catch (error) {
     console.error("Read all error:", error)
-    return unauthorized()
+    return errorResponse("Gagal menandai notifikasi", 500)
   }
 }

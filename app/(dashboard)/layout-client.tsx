@@ -121,7 +121,7 @@ export function DashboardLayoutClient({
       const res = await fetch("/api/notifications/unread-count")
       const data = await res.json()
       if (data.success) setUnreadCount(data.data.count)
-    } catch {}
+    } catch { console.error("Failed to fetch unread count") }
   }, [])
 
   const fetchNotifications = useCallback(async () => {
@@ -130,7 +130,7 @@ export function DashboardLayoutClient({
       const res = await fetch("/api/notifications?limit=10")
       const data = await res.json()
       if (data.success) setNotifications(data.data)
-    } catch {}
+    } catch { console.error("Failed to fetch notifications") }
     setNotifLoading(false)
   }, [])
 
@@ -151,7 +151,7 @@ export function DashboardLayoutClient({
         prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       )
       setUnreadCount((prev) => Math.max(0, prev - 1))
-    } catch {}
+    } catch { console.error("Failed to mark notification as read") }
   }
 
   async function markAllAsRead() {
@@ -159,7 +159,7 @@ export function DashboardLayoutClient({
       await fetch("/api/notifications/read-all", { method: "PUT" })
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
       setUnreadCount(0)
-    } catch {}
+    } catch { console.error("Failed to mark all notifications as read") }
   }
 
   return (
@@ -174,7 +174,7 @@ export function DashboardLayoutClient({
         <div className="flex h-16 items-center justify-between px-6 border-b">
           <Link href="/dashboard" className="font-bold text-lg tracking-tight flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary" aria-hidden="true" />
-            e-Jurnal Dosen
+            e-Kendali Dosen
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -231,7 +231,7 @@ export function DashboardLayoutClient({
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-50 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -351,7 +351,7 @@ export function DashboardLayoutClient({
           {children}
         </main>
       </div>
-      <BottomTabBar />
+      <BottomTabBar role={user.role} />
     </div>
   )
 }

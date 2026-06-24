@@ -51,6 +51,7 @@ interface Props {
 export function MonitoringClient({ prodiList, allDosen }: Props) {
   const [sessions, setSessions] = useState<SessionItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   const [selectedProdi, setSelectedProdi] = useState("all")
   const [selectedDosen, setSelectedDosen] = useState("all")
   const [dateFrom, setDateFrom] = useState("")
@@ -62,6 +63,7 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
 
   const fetchSessions = useCallback(async () => {
     setLoading(true)
+    setError("")
     try {
       const params = new URLSearchParams()
       if (selectedProdi && selectedProdi !== "all") params.set("prodiId", selectedProdi)
@@ -71,7 +73,7 @@ export function MonitoringClient({ prodiList, allDosen }: Props) {
       const res = await fetch(`/api/sessions?${params.toString()}`)
       const json = await res.json()
       if (json.success) setSessions(json.data)
-    } catch {}
+    } catch { setError("Gagal memuat data monitoring") }
     setLoading(false)
   }, [selectedProdi, selectedDosen])
 

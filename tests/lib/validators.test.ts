@@ -47,16 +47,13 @@ describe("sessionSchema", () => {
     expect(result.success).toBe(true)
   })
 
-  it("fails for luring session without GPS", () => {
+  it("accepts luring session without GPS (GPS disabled)", () => {
     const result = sessionSchema.safeParse({
       ...validSession,
       latitude: undefined,
       longitude: undefined,
     })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      expect(result.error.issues.some((i) => i.path.includes("latitude"))).toBe(true)
-    }
+    expect(result.success).toBe(true)
   })
 
   it("fails for daring session without URL", () => {

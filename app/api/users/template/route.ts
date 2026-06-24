@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth"
-import { successResponse, errorResponse, unauthorized, forbidden } from "@/lib/api"
+import { errorResponse, unauthorized, forbidden } from "@/lib/api"
 import { generateTemplateExcel } from "@/lib/excel"
 import { NextResponse } from "next/server"
 
@@ -11,6 +11,7 @@ export async function GET() {
 
     const buffer = await generateTemplateExcel([
       { header: "Nama", key: "name" },
+      { header: "Username", key: "username" },
       { header: "Email", key: "email" },
       { header: "NIDN", key: "nidn" },
       { header: "NIP", key: "nip" },
